@@ -1,0 +1,16 @@
+---
+import Base from '../../layouts/Base.astro';
+import content from '../../data/content.json';
+import { withBase } from '../../lib/model.mjs';
+const link = (path = '') => withBase(import.meta.env.BASE_URL, path);
+---
+<Base title={`${content.profile.name} · 公开简历`} resume>
+  <div class="resume-toolbar wrap"><a class="back-link" href={link()}>← 返回个人主页</a><div><button type="button" class="button button-secondary" data-print hidden>打印简历</button><a class="button button-primary" href={link('resume.pdf')} download="肖逸辰_公开简历.pdf">下载 PDF ↓</a></div></div>
+  <article class="resume-sheet"><header class="resume-heading"><div><p class="eyebrow">个人简历 / RESUME</p><h1>{content.profile.name}</h1><p>{content.profile.tagline}</p></div><address><a href={`mailto:${content.profile.email}`}>{content.profile.email}</a><span>{content.profile.location}</span></address></header>
+    <section><h2>个人介绍</h2><p>{content.profile.intro}</p></section>
+    <section><h2>教育与研究</h2><div class="resume-entry-heading"><h3>{content.education.school} · {content.education.major}</h3><span>{content.education.enrolled} — {content.education.expectedGraduation}（预计）</span></div><p>{content.education.college} · {content.education.enrolled} 级</p><p>{content.education.description}</p></section>
+    <section><h2>项目经历</h2>{content.projects.map(project => <div class="resume-project"><div class="resume-entry-heading"><h3><a href={link(`projects/${project.slug}/`)}>{project.title}</a></h3><span>{project.period}</span></div><p class="resume-role">{project.role}</p><ul>{project.responsibilities.map(item => <li>{item}</li>)}</ul><p class="resume-reflection">实践收获：{project.reflection}</p></div>)}</section>
+    <section><h2>荣誉</h2>{content.honors.map(honor => <p><strong>{honor.title}</strong> · {honor.level}</p>)}</section>
+    <p class="resume-note">项目持续推进中。团队产出、个人职责与验证阶段分别表述；项目详情见个人主页。</p>
+  </article>
+</Base>

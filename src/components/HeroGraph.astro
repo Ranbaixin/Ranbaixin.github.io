@@ -1,0 +1,24 @@
+---
+import { withBase } from '../lib/model.mjs';
+const link = (path: string) => withBase(import.meta.env.BASE_URL, path);
+---
+<div class="hero-graph" data-hero-graph>
+  <div class="graph-corner graph-corner-tl"></div><div class="graph-corner graph-corner-br"></div>
+  <div class="graph-plot">
+    <svg viewBox="0 0 570 480" fill="none" aria-hidden="true">
+      <defs><pattern id="hero-grid" width="30" height="30" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="1" fill="currentColor" opacity=".15"/></pattern></defs>
+      <rect width="570" height="480" fill="url(#hero-grid)"/>
+      <circle cx="285" cy="240" r="158" class="graph-orbit"/><circle cx="285" cy="240" r="106" class="graph-orbit graph-orbit-inner"/>
+      <path d="M70 240H500M285 35V445" class="graph-axis"/>
+      <path d="M120 165C220 20 473 177 430 345S156 418 120 165Z" class="graph-path"/>
+      <path d="M120 165L430 345L325 105Z" class="graph-connection"/>
+      <circle cx="285" cy="240" r="5" fill="currentColor"/><text x="297" y="230" class="math-label">O</text>
+      <text x="508" y="235" class="math-label">x</text><text x="297" y="36" class="math-label">y</text>
+      <text x="66" y="386" class="math-note">f(x) = curiosity + practice</text><text x="380" y="72" class="math-note">x ∈ ℝ</text>
+    </svg>
+    <a class="graph-node node-cad" href={link('projects/dwg-agent/')}><span class="node-icon">01</span><span>图纸与集成<small>CAD & INTEGRATION</small></span><span aria-hidden="true">↗</span></a>
+    <a class="graph-node node-data" href={link('projects/renewable-forecasting/')}><span class="node-icon">02</span><span>数据与预测<small>DATA & FORECAST</small></span><span aria-hidden="true">↗</span></a>
+    <a class="graph-node node-wiring" href={link('projects/electrical-drawings/')}><span class="node-icon">03</span><span>解析与查询<small>PARSE & CONNECT</small></span><span aria-hidden="true">↗</span></a>
+  </div>
+  <div class="graph-label"><span class="live-dot"></span> 三个方向，同一份好奇心 <span>↗</span></div>
+</div>

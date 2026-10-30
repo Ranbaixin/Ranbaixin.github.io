@@ -1,0 +1,31 @@
+---
+interface Props { theme: string; }
+const { theme } = Astro.props;
+---
+<div class:list={['project-art', `art-${theme}`]} aria-hidden="true">
+  <svg viewBox="0 0 600 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs><pattern id={`grid-${theme}`} width="24" height="24" patternUnits="userSpaceOnUse"><path d="M24 0H0V24" class="art-grid"/></pattern></defs>
+    <rect width="600" height="340" fill={`url(#grid-${theme})`}/>
+    {theme === 'cad' ? <>
+      <path d="M120 110L280 52L453 133L293 200Z M120 110V222L293 296V200 M453 133V238L293 296 M280 52V162L453 238 M120 222L280 162L293 169" class="art-line"/>
+      <path d="M180 135L284 98L391 147L287 185Z M180 135V198L287 246V185 M391 147V207L287 246" class="art-line art-secondary"/>
+      <path d="M92 90L255 30M470 130L490 138M96 239L265 312" class="art-dimension"/>
+      <circle cx="120" cy="110" r="5" class="art-point"/><circle cx="293" cy="200" r="5" class="art-point"/><circle cx="453" cy="133" r="5" class="art-point"/>
+      <text x="32" y="45">01 / CAD WORKFLOW</text><text x="390" y="305">INPUT → PROCESS → DATA</text>
+    </> : theme === 'energy' ? <>
+      <path d="M70 70V268H540" class="art-line art-secondary"/>
+      <path d="M74 232C115 226 127 146 171 164S231 225 277 165S326 78 371 119S426 205 472 122S513 110 538 77" class="art-line"/>
+      <path d="M74 211C115 207 132 168 175 180S235 199 277 150S331 102 373 137S436 172 476 135S514 104 538 108" class="art-prediction"/>
+      <path d="M74 232C115 226 127 146 171 164S231 225 277 165S326 78 371 119S426 205 472 122S513 110 538 77V268H74Z" class="art-area"/>
+      <circle cx="277" cy="165" r="6" class="art-point"/><path d="M277 60V268" class="art-dimension"/>
+      <text x="32" y="45">02 / FORECAST RESEARCH</text><text x="346" y="305">OBSERVE → ALIGN → EVALUATE</text>
+    </> : <>
+      <path d="M80 100H218V172H390V244H525M80 244H175V172M302 172V85H492M390 172V108H527" class="art-line"/>
+      <rect x="60" y="80" width="40" height="40" rx="5" class="art-box"/><rect x="60" y="224" width="40" height="40" rx="5" class="art-box"/>
+      <rect x="282" y="65" width="40" height="40" rx="5" class="art-box"/><rect x="505" y="88" width="40" height="40" rx="5" class="art-box"/><rect x="505" y="224" width="40" height="40" rx="5" class="art-box"/>
+      <circle cx="218" cy="172" r="8" class="art-point"/><circle cx="302" cy="172" r="8" class="art-point"/><circle cx="390" cy="172" r="8" class="art-point"/>
+      <text x="32" y="45">03 / DRAWING CONNECTIONS</text><text x="338" y="305">DRAWING → EVIDENCE → QUERY</text>
+    </>}
+  </svg>
+  <span class="art-caption">{theme === 'cad' ? '图纸流转示意' : theme === 'energy' ? '研究方法示意 · 非实测数据' : '端口与连接关系示意'}</span>
+</div>
