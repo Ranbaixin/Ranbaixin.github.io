@@ -1,0 +1,26 @@
+{
+  "name": "xiaoyichen-portfolio",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.23.4"
+  },
+  "scripts": {
+    "dev": "astro dev --host 127.0.0.1",
+    "check": "astro check",
+    "test": "node --test tests/unit.test.mjs",
+    "build": "node scripts/verify-content.mjs && astro build && node scripts/postbuild.mjs",
+    "preview": "astro preview --host 127.0.0.1",
+    "test:browser": "playwright test"
+  },
+  "dependencies": {
+    "astro": "7.4.4"
+  },
+  "devDependencies": {
+    "@astrojs/check": "0.9.12",
+    "@playwright/test": "1.64.1",
+    "@types/node": "24.19.2",
+    "typescript": "5.9.3"
+  }
+}
