@@ -6,7 +6,7 @@ test('public content, exact role attribution, and project filtering', async ({ p
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
   await page.goto(url());
-  await expect(page.getByRole('heading', { name: '肖逸辰.', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Ranxin', exact: true })).toBeVisible();
   await expect(page.locator('[data-project-category]:visible')).toHaveCount(3);
   await page.getByRole('button', { name: '数据科学 01' }).click();
   await expect(page.locator('[data-project-category]:visible')).toHaveCount(1);
@@ -25,9 +25,11 @@ test('each detail route survives refresh and assets stay on the current origin',
     const response = await page.goto(url(`projects/${slug}/`));
     expect(response?.status()).toBe(200);
     await page.reload();
+    await page.getByRole('tab', { name: /我的职责/ }).click();
     await expect(page.getByRole('heading', { name: '我负责的部分' })).toBeVisible();
+    await page.getByRole('tab', { name: /成果与收获/ }).click();
     await expect(page.getByRole('heading', { name: '团队的阶段产出' })).toBeVisible();
-    await expect(page.getByRole('heading', { name: '做到哪里，如何看待结果' })).toBeVisible();
+    await expect(page.locator('[data-case-panel="outcomes"] summary')).toHaveText('做到哪里，如何看待结果');
     await page.getByRole('link', { name: '返回项目列表' }).click();
     await expect(page).toHaveURL(new RegExp(`${base.replaceAll('/', '\\/')}#projects$`));
   }
@@ -60,7 +62,7 @@ test('mobile layout and system reduced motion preserve readable content', async 
     await page.setViewportSize({ width, height: 900 });
     await page.goto(url());
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBeTruthy();
-    await expect(page.locator('#about h2')).toBeVisible();
+    await expect(page.locator('#projects h2')).toBeVisible();
   }
   await expect(page.locator('.graph-path')).toHaveCSS('animation-name', 'none');
 });
@@ -70,7 +72,7 @@ test('without JavaScript the resume, full project list, navigation and email rem
   const page = await context.newPage();
   await page.goto(new URL(url(), process.env.TEST_URL || 'http://127.0.0.1:4321').toString());
   await expect(page.locator('[data-project-category]')).toHaveCount(3);
-  await expect(page.locator('#about')).toContainText('马跃');
+  await expect(page.locator('#journey')).toContainText('马跃');
   await expect(page.getByRole('link', { name: /b1861479356@163.com/ })).toBeVisible();
   await page.goto(new URL(url('resume/'), process.env.TEST_URL || 'http://127.0.0.1:4321').toString());
   await expect(page.locator('.resume-sheet')).toContainText('2029');

@@ -50,7 +50,7 @@ styles = {
 def para(text, style="body"):
     return Paragraph(escape(text), styles[style])
 
-story = [para(data["profile"]["name"], "name"), para(data["profile"]["tagline"], "tag")]
+story = [para(data["profile"]["name"], "name"), para(data["profile"]["nicknameEn"] + " · " + data["profile"]["nicknameZh"], "tag"), para(data["profile"]["tagline"], "tag")]
 story += [para(data["profile"]["email"] + "  |  " + data["profile"]["location"], "contact"), Spacer(1, 10)]
 story += [para("个人介绍", "heading"), para(data["profile"]["intro"])]
 education = data["education"]

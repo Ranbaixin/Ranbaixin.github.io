@@ -1,0 +1,36 @@
+---
+import { wiringSample, queryConnections } from './model.mjs';
+const result = queryConnections(wiringSample, 'p1', 'direct');
+const port = (id: string) => wiringSample.ports.find(p => p.id === id)!;
+---
+<section class="experience experience-wiring" data-experience="wiring-query" aria-label="端口查询交互体验">
+  <div class="experience-topline"><span class="demo-label">重建样例 / CONNECTION ATLAS</span><button class="reset-button" data-demo-reset hidden type="button">重置体验 ↺</button></div>
+  <div class="experience-layout">
+    <div class="demo-visual">
+      <div class="visual-heading"><span>从一个端口，找到依据。</span><span class="mono">PORT → CONNECTION → SOURCE</span></div>
+      <svg class="wiring-canvas" viewBox="0 0 780 470" role="group" aria-label="重建的双页电路示意图，包含已确认、待核与冲突关系">
+        <rect x="35" y="65" width="490" height="350" rx="12" class="drawing-sheet"/><rect x="575" y="65" width="170" height="350" rx="12" class="drawing-sheet"/>
+        <text x="55" y="96" class="svg-note">样例页 01</text><text x="595" y="96" class="svg-note">样例页 02</text>
+        <g data-wiring-edges>{wiringSample.edges.map(edge => <g data-edge-id={edge.id} class:list={['wire-edge', edge.status, edge.kind, { active: result.edges.some(e => e.id === edge.id) }]}><line x1={port(edge.a).x} y1={port(edge.a).y} x2={port(edge.b).x} y2={port(edge.b).y}/></g>)}</g>
+        <rect x="649" y="220" width="62" height="55" rx="4" class="device-symbol"/><text x="680" y="253" class="device-text" text-anchor="middle">器件</text>
+        <g data-wiring-ports>{wiringSample.ports.map(p => <g data-port-id={p.id} class:list={['wire-port', { selected: p.id === 'p1', connected: result.portIds.includes(p.id) }]}><circle cx={p.x} cy={p.y} r="19"/><text x={p.x} y={p.y - 33} text-anchor="middle">{p.label}</text><circle cx={p.x} cy={p.y} r="4" class="port-center"/></g>)}</g>
+        <text x="68" y="449" class="svg-note">实线：已确认 · 虚线：待核 · 点线：冲突</text>
+      </svg>
+      <div class="object-caption"><span class="status-dot"></span><span data-wiring-selection>A:1 · 样例页 01 · 样例输入端</span></div>
+    </div>
+    <aside class="demo-controls" data-demo-controls hidden aria-label="端口查询控件">
+      <label>搜索端口<input data-port-search type="search" aria-label="搜索端口" placeholder="例如 A:3" autocomplete="off" maxlength="40"/></label>
+      <div class="port-list" data-port-list aria-label="匹配端口"></div>
+      <div class="control-divider"></div>
+      <p class="control-eyebrow">选择查询范围</p>
+      <div class="query-modes" role="group" aria-label="连接查询范围"><button data-wiring-mode="direct" aria-pressed="true" type="button">直接连接</button><button data-wiring-mode="network" aria-pressed="false" type="button">已确认网络</button><button data-wiring-mode="pending" aria-pressed="false" type="button">待核信息</button></div>
+      <p class="control-hint" data-query-hint>直接连接展示实际相邻的导线或桥接。</p>
+    </aside>
+    <div class="demo-results">
+      <div class="query-result-heading"><h3 data-wiring-result-title>A:1 的直接连接</h3><span class="mono" data-wiring-count>01 CONNECTION</span></div>
+      <div class="connection-results" data-wiring-results aria-live="polite"><article class="connection-row"><strong>A:1 ↔ A:2</strong><span>已确认导线</span><span>样例页 01 · 上方导线</span></article></div>
+      <div class="evidence-box" data-evidence tabindex="-1"><span class="control-eyebrow">图纸依据</span><p>选择一条结果的“查看依据”，定位它在样例图中的关系。</p></div>
+      <p class="quiet-note">已确认网络沿已确认导线、桥接和跨页关系展开，保留器件边界；待核与冲突单列。</p>
+    </div>
+  </div>
+</section>

@@ -16,9 +16,9 @@ test('path helper rejects traversal and external destinations', () => {
 });
 
 const valid = () => ({
-  profile: { name: 'Example', email: 'example@example.org', intro: 'Public introduction' },
+  profile: { name: 'Example', nicknameEn: 'Ranxin', nicknameZh: '然鑫', email: 'example@example.org', intro: 'Public introduction' },
   education: { school: 'Example University', major: 'Computing', enrolled: 2025, expectedGraduation: 2029 },
-  projects: [{ slug: 'example', title: 'Example', category: 'engineering', start: '2026-05', role: 'Member', summary: 'Public summary', responsibilities: ['Work'], background: 'Problem', outcomes: ['Team output'], methods: ['Method'], verification: 'Partial validation', reflection: 'Reflection' }],
+  projects: [{ slug: 'example', title: 'Example', category: 'engineering', start: '2026-05', role: 'Member', summary: 'Public summary', responsibilities: ['Work'], background: 'Problem', outcomes: ['Team output'], methods: ['Method'], verification: 'Partial validation', reflection: 'Reflection', demo: { type: 'cad-flow', sample: 'cad-v1' } }],
   honors: [{ title: 'Competition', year: 2025, level: 'Third prize' }]
 });
 
@@ -55,4 +55,16 @@ test('private root fields and incomplete honors are rejected before publication'
   const honor = valid();
   honor.honors[0].level = '';
   assert.match(validateContent(honor).join(';'), /honor.*level/);
+});
+
+test('nickname and approved demo sample references are required for publication', () => {
+  const data = valid();
+  data.profile.nicknameEn = '';
+  assert.match(validateContent(data).join(';'), /nicknameEn/);
+  const bad = valid();
+  bad.projects[0].demo.sample = 'private-drawing';
+  assert.match(validateContent(bad).join(';'), /demo/);
+  const extra = valid();
+  extra.projects[0].demo.source = 'unapproved';
+  assert.match(validateContent(extra).join(';'), /demo/);
 });

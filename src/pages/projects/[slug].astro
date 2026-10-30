@@ -1,16 +1,46 @@
 ---
 import Base from '../../layouts/Base.astro';
-import ProjectArt from '../../components/ProjectArt.astro';
+import CadExperience from '../../experiences/cad/Experience.astro';
+import EnergyExperience from '../../experiences/energy/Experience.astro';
+import WiringExperience from '../../experiences/wiring/Experience.astro';
 import content from '../../data/content.json';
 import { withBase } from '../../lib/model.mjs';
+import '../../styles/experiences.css';
 export function getStaticPaths() { return content.projects.map(project => ({ params: { slug: project.slug }, props: { project } })); }
 const { project } = Astro.props;
 const link = (path = '') => withBase(import.meta.env.BASE_URL, path);
 const next = content.projects[(content.projects.findIndex(p => p.slug === project.slug) + 1) % content.projects.length];
+const prompts: Record<string, string> = {
+  'cad-flow': '选一张图，看看信息怎样流向下一步。',
+  'output-forecast': '换个场景，亲手比较预测与误差。',
+  'wiring-query': '点一个端口，沿着连接找到依据。',
+};
 ---
-<Base title={`${project.title} · 肖逸辰`} description={project.summary}>
-  <article class="case-page wrap"><a class="back-link" href={link('#projects')}>← 返回项目列表</a><div class="case-kicker mono">PROJECT {project.number} / {project.categoryLabel}</div><h1>{project.title}</h1><p class="case-lead">{project.summary}</p><dl class="case-meta"><div><dt>参与时间</dt><dd>{project.period}</dd></div><div><dt>我的职责</dt><dd>{project.role}</dd></div><div><dt>项目状态</dt><dd>持续推进 · 阶段验证</dd></div></dl><ProjectArt theme={project.theme}/>
-    <div class="case-body"><section><span class="section-number mono">01 / CONTEXT</span><div><h2>从什么问题出发</h2><p>{project.background}</p></div></section><section><span class="section-number mono">02 / MY ROLE</span><div><h2>我负责的部分</h2><ul>{project.responsibilities.map(item => <li>{item}</li>)}</ul></div></section><section><span class="section-number mono">03 / TEAM OUTPUT</span><div><h2>团队的阶段产出</h2><ul>{project.outcomes.map(item => <li>{item}</li>)}</ul><div class="project-tags">{project.methods.map(method => <span>{method}</span>)}</div></div></section><section><span class="section-number mono">04 / VALIDATION</span><div><h2>做到哪里，如何看待结果</h2><p>{project.verification}</p></div></section><section class="case-reflection"><span class="section-number mono">05 / REFLECTION</span><div><h2>留下的理解</h2><p>{project.reflection}</p></div></section></div>
-    <a class="next-project" href={link(`projects/${next.slug}/`)}><div><span class="mono">NEXT PROJECT</span><h2>{next.title}</h2></div><span aria-hidden="true">↗</span></a>
+<Base title={`${project.title} · ${content.profile.nicknameEn}`} description={project.summary}>
+  <article class="case-page case-interactive wrap">
+    <a class="back-link" href={link('#projects')}>← 返回项目列表</a>
+    <header class="case-heading"><div><p class="case-kicker mono">PROJECT {project.number} / {project.categoryLabel}</p><h1>{project.title}</h1><p class="case-invitation">{prompts[project.demo.type]}</p></div><div class="case-date"><span>{project.period}</span><span>{project.role}</span></div></header>
+    <div class="case-tabs" data-case-tabs role="tablist" aria-label="项目内容" hidden>
+      <button role="tab" id="tab-experience" aria-controls="panel-experience" aria-selected="true" data-case-tab="experience" type="button">交互体验 <span>01</span></button>
+      <button role="tab" id="tab-role" aria-controls="panel-role" aria-selected="false" data-case-tab="role" tabindex="-1" type="button">我的职责 <span>02</span></button>
+      <button role="tab" id="tab-outcomes" aria-controls="panel-outcomes" aria-selected="false" data-case-tab="outcomes" tabindex="-1" type="button">成果与收获 <span>03</span></button>
+    </div>
+    <section id="panel-experience" data-case-panel="experience" role="tabpanel" aria-labelledby="tab-experience" tabindex="0">
+      <noscript><p class="no-script-note">当前显示静态样例与结果。启用 JavaScript 后，可操作场景、筛选和查询；下方仍可完整阅读职责与成果。</p></noscript>
+      {project.demo.type === 'cad-flow' && <CadExperience />}
+      {project.demo.type === 'output-forecast' && <EnergyExperience />}
+      {project.demo.type === 'wiring-query' && <WiringExperience />}
+      <p data-experience-error class="no-script-note" hidden>交互资源暂未加载，静态样例仍可阅读。刷新后可重试。</p>
+    </section>
+    <section id="panel-role" class="case-reading" data-case-panel="role" role="tabpanel" aria-labelledby="tab-role" tabindex="0">
+      <div class="reading-heading"><span class="control-eyebrow">MY CONTRIBUTION</span><h2>我负责的部分</h2><p>{project.role} · {project.period}</p></div>
+      <div class="reading-content"><ul class="responsibility-list">{project.responsibilities.map((item, index) => <li><span class="mono">0{index + 1}</span><p>{item}</p></li>)}</ul><details class="method-details"><summary>项目背景与技术方法</summary><p>{project.background}</p><div class="project-tags">{project.methods.map(method => <span>{method}</span>)}</div></details></div>
+    </section>
+    <section id="panel-outcomes" class="case-reading" data-case-panel="outcomes" role="tabpanel" aria-labelledby="tab-outcomes" tabindex="0">
+      <div class="reading-heading"><span class="control-eyebrow">OUTPUT & REFLECTION</span><h2>成果与收获</h2><p>个人工作与团队产出分别记录。</p></div>
+      <div class="reading-content"><h3>团队的阶段产出</h3><ul>{project.outcomes.map(item => <li>{item}</li>)}</ul><details class="method-details" open><summary>做到哪里，如何看待结果</summary><p>{project.verification}</p></details><blockquote class="project-reflection"><span>实践收获</span><p>{project.reflection}</p></blockquote></div>
+    </section>
+    <a class="next-project" href={link(`projects/${next.slug}/`)}><div><span class="mono">NEXT EXPERIENCE</span><h2>{next.title}</h2></div><span aria-hidden="true">↗</span></a>
   </article>
+  <script>import '../../experiences/load';</script>
 </Base>

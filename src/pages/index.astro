@@ -5,42 +5,43 @@ import ProjectArt from '../components/ProjectArt.astro';
 import content from '../data/content.json';
 import { withBase } from '../lib/model.mjs';
 const link = (path = '') => withBase(import.meta.env.BASE_URL, path);
+const teasers: Record<string, { title: string; line: string; action: string }> = {
+  'dwg-agent': { title: '让图纸，进入流程。', line: '选中一块余料，走过校验、交接与入库。', action: '体验图纸流程' },
+  'renewable-forecasting': { title: '让预测，经得起比较。', line: '换一个场景，看看曲线与误差怎样变化。', action: '探索预测曲线' },
+  'electrical-drawings': { title: '让连接，有据可循。', line: '从一个端口出发，找到连接和图纸依据。', action: '查询端口连接' },
+};
 ---
 <Base>
   <section class="hero wrap" aria-labelledby="hero-title">
     <div class="hero-copy">
-      <div class="eyebrow"><span class="live-dot"></span> 在学习中探索，在实践中生长</div>
-      <h1 id="hero-title">{content.profile.name}<span class="name-period">.</span></h1>
-      <p class="hero-statement">以计算，<br/>连接真实问题<span class="small-star" aria-hidden="true">✳</span></p>
-      <p class="hero-description">{content.education.school} · {content.education.major}<br/>关注数据科学、机器学习与工程自动化。</p>
-      <div class="hero-actions"><a class="button button-primary" href="#projects">探索我的项目 <span aria-hidden="true">↗</span></a><a class="plain-link" href={link('resume/')}>查看简历 <span aria-hidden="true">→</span></a></div>
+      <p class="eyebrow"><span class="live-dot"></span> 在学习中探索，在实践中生长</p>
+      <div class="nickname-lockup"><h1 id="hero-title">{content.profile.nicknameEn}</h1><span class="nickname-zh">{content.profile.nicknameZh}</span></div>
+      <p class="hero-statement">用计算，连接真实问题<span class="name-period">.</span></p>
+      <p class="hero-description">探索数据科学与工程自动化。<br/>从三个可以动手的项目，认识我的实践。</p>
+      <div class="hero-actions"><a class="button button-primary" href="#projects">探索项目 <span aria-hidden="true">↗</span></a><button type="button" class="plain-link profile-trigger" data-profile-open hidden>个人资料 <span aria-hidden="true">＋</span></button><noscript><a class="plain-link" href={link('resume/')}>个人资料 ↗</a></noscript></div>
     </div>
     <HeroGraph />
-    <div class="hero-bottom"><span class="mono">PERSONAL PORTFOLIO / 2026</span><div>{content.profile.focus.map((focus, i) => <><span>{focus}</span>{i < 2 && <span class="focus-divider" aria-hidden="true">/</span>}</>)}</div><a href="#about" aria-label="向下阅读个人简介">向下探索 ↓</a></div>
-  </section>
-
-  <section id="about" class="section about-section wrap" aria-labelledby="about-title">
-    <div class="section-label"><span>01</span> 关于我 <span class="mono">ABOUT</span></div>
-    <div class="about-grid"><h2 id="about-title" data-reveal>从课堂出发，<br/>走向具体的问题。</h2><div class="about-copy" data-reveal><p>{content.profile.intro}</p><p class="muted">在研究与项目之间，我希望把问题理解得更清楚，也让每一步实践有据可循。</p></div></div>
-    <dl class="facts" data-reveal><div><dt>就读学校</dt><dd>{content.education.school}</dd><small>{content.education.college}</small></div><div><dt>专业方向</dt><dd>{content.education.major}</dd><small>数据科学与机器学习研究</small></div><div><dt>学习阶段</dt><dd>{content.education.enrolled} 级</dd><small>预计 {content.education.expectedGraduation} 年毕业</small></div><div><dt>指导教师</dt><dd>{content.profile.advisor} 老师</dd><small>研究指导与企业项目实践</small></div></dl>
+    <div class="hero-bottom"><span class="mono">IDEAS INTO PRACTICE / 2026</span><div>{content.profile.focus.map((focus, i) => <><span>{focus}</span>{i < 2 && <span class="focus-divider" aria-hidden="true">/</span>}</>)}</div><a href="#projects">向下探索 ↓</a></div>
   </section>
 
   <section id="projects" class="section projects-section wrap" aria-labelledby="projects-title">
-    <div class="section-label"><span>02</span> 精选项目 <span class="mono">SELECTED WORK</span></div>
-    <div class="section-heading"><h2 id="projects-title" data-reveal>把问题拆开，<br/>把想法做出来。</h2><p class="section-intro">从图纸到数据，从模块到协作。<br/>记录我正在参与的三段工程实践。</p></div>
+    <div class="section-label"><span>01</span> 精选实践 <span class="mono">SELECTED WORK</span></div>
+    <div class="section-heading"><h2 id="projects-title" data-reveal>从一个操作，<br/>走近一个项目。</h2><p class="section-intro">真实流程，重建样例。<br/>亲手试一试，再了解背后的工作。</p></div>
     <div class="project-toolbar" data-filters hidden><div class="filter-buttons" role="group" aria-label="按方向筛选项目"><button type="button" data-filter="all" aria-pressed="true">全部项目 <span>03</span></button><button type="button" data-filter="engineering" aria-pressed="false">工程自动化 <span>02</span></button><button type="button" data-filter="data" aria-pressed="false">数据科学 <span>01</span></button></div><span class="filter-count" data-filter-count aria-live="polite">展示 3 个项目</span></div>
     <div class="project-list">{content.projects.map(project => <article class="project-row" data-project-category={project.category} data-reveal>
-      <a class="project-visual-link" href={link(`projects/${project.slug}/`)} aria-label={`查看${project.title}`}><ProjectArt theme={project.theme} /><span class="project-visual-arrow" aria-hidden="true">↗</span></a>
-      <div class="project-copy"><div class="project-topline"><span class="mono">{project.number} / {project.categoryLabel}</span><span>{project.period}</span></div><h3><a href={link(`projects/${project.slug}/`)}>{project.title}</a></h3><p>{project.summary}</p><div class="project-tags">{project.methods.slice(0, 3).map(method => <span>{method}</span>)}</div><a class="case-link" href={link(`projects/${project.slug}/`)}>阅读项目故事 <span aria-hidden="true">↗</span></a></div>
+      <a class="project-visual-link" href={link(`projects/${project.slug}/`)} aria-label={`进入${project.title}体验`}><ProjectArt theme={project.theme} /><span class="preview-label">可交互体验 <span aria-hidden="true">↗</span></span></a>
+      <div class="project-copy"><div class="project-topline"><span class="mono">{project.number} / {project.categoryLabel}</span><span>{project.period}</span></div><h3><a href={link(`projects/${project.slug}/`)}>{teasers[project.slug].title}</a></h3><p>{teasers[project.slug].line}</p><div class="project-role">{project.role}</div><a class="case-link" href={link(`projects/${project.slug}/`)}>{teasers[project.slug].action} <span aria-hidden="true">↗</span></a><span class="project-name">{project.title}</span></div>
     </article>)}</div>
     <p class="empty-state" data-empty-state hidden>这个方向暂无项目。选择“全部项目”继续浏览。</p>
   </section>
 
-  <section id="journey" class="section journey-section wrap" aria-labelledby="journey-title"><div class="section-label"><span>03</span> 经历与收获 <span class="mono">THE JOURNEY</span></div><div class="section-heading"><h2 id="journey-title" data-reveal>每一步，<br/>都留下新的理解。</h2><p class="section-intro">学习、尝试、协作，再继续前行。</p></div>
-    <div class="timeline"><div class="timeline-entry education-entry" data-reveal><div class="timeline-date mono">{content.education.enrolled} — {content.education.expectedGraduation} <small>预计毕业</small></div><div class="timeline-dot"></div><div class="timeline-body"><span class="entry-kind">学习与研究</span><h3>{content.education.school}</h3><p>{content.education.college} · {content.education.major}</p><p class="muted">{content.education.description}</p></div></div>{content.projects.map(project => <div class="timeline-entry" data-reveal><div class="timeline-date mono">{project.period}</div><div class="timeline-dot"></div><div class="timeline-body"><span class="entry-kind">{project.role}</span><h3><a href={link(`projects/${project.slug}/`)}>{project.title}</a></h3><details><summary>职责与实践收获 <span aria-hidden="true">+</span></summary><ul>{project.responsibilities.map(item => <li>{item}</li>)}</ul><p class="reflection-text">{project.reflection}</p></details></div></div>)}</div>
+  <section id="journey" class="section journey-section wrap" aria-labelledby="journey-title">
+    <div class="section-label"><span>02</span> 经历与收获 <span class="mono">THE JOURNEY</span></div>
+    <div class="section-heading"><h2 id="journey-title" data-reveal>一步一步，<br/>把问题理解得更深。</h2><p class="section-intro">学习、尝试、协作，再继续前行。</p></div>
+    <div class="timeline"><div class="timeline-entry education-entry" data-reveal><div class="timeline-date mono">{content.education.enrolled} — {content.education.expectedGraduation}<small>预计毕业</small></div><div class="timeline-dot"></div><div class="timeline-body"><span class="entry-kind">学习与研究</span><h3>{content.education.school}</h3><details><summary>教育与研究方向 <span aria-hidden="true">+</span></summary><p>{content.education.college} · {content.education.major}</p><p>{content.education.description}</p></details></div></div>{content.projects.map(project => <div class="timeline-entry" data-reveal><div class="timeline-date mono">{project.period}</div><div class="timeline-dot"></div><div class="timeline-body"><span class="entry-kind">{project.role}</span><h3><a href={link(`projects/${project.slug}/`)}>{project.title}</a></h3><details><summary>职责与实践收获 <span aria-hidden="true">+</span></summary><ul>{project.responsibilities.map(item => <li>{item}</li>)}</ul><p class="reflection-text">{project.reflection}</p></details></div></div>)}</div>
   </section>
 
-  <section id="honors" class="section honors-section wrap" aria-labelledby="honors-title"><div class="section-label"><span>04</span> 荣誉记录 <span class="mono">RECOGNITION</span></div><div class="honor-row" data-reveal><div class="award-symbol" aria-hidden="true">✳</div><div><span class="mono muted">{content.honors[0].year} / ELECTRONIC DESIGN</span><h2 id="honors-title">{content.honors[0].title}</h2><p>在实践中探索，在协作中成长。</p></div><span class="award-level">{content.honors[0].level}<span aria-hidden="true">↗</span></span></div></section>
+  <section id="honors" class="section honors-section wrap" aria-labelledby="honors-title"><div class="section-label"><span>03</span> 荣誉记录 <span class="mono">RECOGNITION</span></div><div class="honor-row" data-reveal><div class="award-symbol" aria-hidden="true">✳</div><div><span class="mono muted">{content.honors[0].year} / ELECTRONIC DESIGN</span><h2 id="honors-title">{content.honors[0].title}</h2></div><span class="award-level">{content.honors[0].level}<span aria-hidden="true">↗</span></span></div></section>
 
-  <section id="contact" class="contact-section wrap" aria-labelledby="contact-title"><div class="section-label"><span>05</span> 保持联系 <span class="mono">LET'S CONNECT</span></div><div class="contact-grid"><div><h2 id="contact-title">下一个问题，<br/>也许可以一起探索<span class="name-period">.</span></h2><p>欢迎就数据科学、工程实践与项目协作交流。</p></div><div class="contact-actions"><a class="email-link" href={`mailto:${content.profile.email}`}>{content.profile.email}<span aria-hidden="true">↗</span></a><div class="contact-bottom"><button type="button" class="text-button" data-copy-email={content.profile.email} hidden>复制邮箱</button><span role="status" data-copy-status></span><a class="plain-link" href={link('resume.pdf')} download="肖逸辰_公开简历.pdf">下载简历 PDF ↓</a></div></div></div></section>
+  <section id="contact" class="contact-section wrap" aria-labelledby="contact-title"><div class="section-label"><span>04</span> 保持联系 <span class="mono">LET'S CONNECT</span></div><div class="contact-grid"><div><h2 id="contact-title">下一个问题，<br/>也许可以一起探索<span class="name-period">.</span></h2><p>欢迎就数据科学、工程实践与项目协作交流。</p></div><div class="contact-actions"><a class="email-link" href={`mailto:${content.profile.email}`}>{content.profile.email}<span aria-hidden="true">↗</span></a><div class="contact-bottom"><button type="button" class="text-button" data-copy-email={content.profile.email} hidden>复制邮箱</button><span role="status" data-copy-status></span><a class="plain-link" href={link('resume.pdf')} download="Ranxin_公开简历.pdf">下载简历 PDF ↓</a></div></div></div></section>
 </Base>
