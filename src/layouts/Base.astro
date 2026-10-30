@@ -3,6 +3,7 @@ import content from '../data/content.json';
 import { withBase } from '../lib/model.mjs';
 import '../styles/global.css';
 import '../styles/portfolio.css';
+import '../styles/motion.css';
 import Profile from '../components/Profile.astro';
 interface Props { title?: string; description?: string; resume?: boolean; }
 const { title = `${content.profile.nicknameEn} · ${content.profile.nicknameZh}｜数据科学与工程自动化`, description = '探索数据科学与工程自动化，用计算连接真实问题。通过三个可交互的项目样例，认识 Ranxin 的实践。', resume = false } = Astro.props;
@@ -50,6 +51,6 @@ const icpNumber = import.meta.env.PUBLIC_ICP_NUMBER;
       <div class="footer-meta"><span>© {new Date().getFullYear()} {content.profile.nicknameEn}</span><span>{content.profile.location}</span>{icpNumber && <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">{icpNumber}</a>}<button type="button" class="text-button" data-motion-toggle hidden aria-pressed="false">减少动画</button><a href="#top">回到顶部 ↑</a></div>
     </footer>
     {!resume && <Profile />}
-    <script>import '../scripts/ui';</script>
+    <script>import '../scripts/ui'; import '../motion/choreography';</script>
   </body>
 </html>
