@@ -107,18 +107,3 @@ if ('IntersectionObserver' in window) {
   document.querySelectorAll<HTMLElement>('[data-hero-graph]').forEach(element => observer.observe(element));
 }
 
-const graph = document.querySelector<HTMLElement>('[data-hero-graph]');
-if (graph && matchMedia('(pointer: fine)').matches) {
-  let scheduled = false;
-  graph.addEventListener('pointermove', event => {
-    if (reduced() || scheduled) return;
-    scheduled = true;
-    requestAnimationFrame(() => {
-      const bounds = graph.getBoundingClientRect();
-      graph.style.setProperty('--pointer-x', String(Math.max(-1, Math.min(1, (event.clientX - bounds.left) / bounds.width * 2 - 1))));
-      graph.style.setProperty('--pointer-y', String(Math.max(-1, Math.min(1, (event.clientY - bounds.top) / bounds.height * 2 - 1))));
-      scheduled = false;
-    });
-  }, { passive: true });
-  graph.addEventListener('pointerleave', () => { graph.style.setProperty('--pointer-x', '0'); graph.style.setProperty('--pointer-y', '0'); });
-}
