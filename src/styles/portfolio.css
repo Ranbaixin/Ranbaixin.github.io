@@ -1,0 +1,58 @@
+/* The new identity and reading rhythm extend the existing site theme. */
+.hero { grid-template-columns: 1.05fr 1fr; gap: 20px; padding-top: 70px; }
+.nickname-lockup { position: relative; width: fit-content; margin: 22px 0 30px; }
+.hero .nickname-lockup h1 { font-size: clamp(92px, 10vw, 153px); line-height: .98; letter-spacing: -.075em; font-weight: 650; margin: 0; }
+.nickname-zh { display: block; color: var(--blue); text-align: right; font-size: 23px; letter-spacing: .26em; margin-top: 14px; padding-right: 5px; }
+.hero .hero-statement { font-size: clamp(24px, 2.4vw, 34px); line-height: 1.5; }
+.hero .hero-description { font-size: 14px; line-height: 1.9; margin-top: 20px; }
+.hero-actions { gap: 28px; }
+.profile-trigger { background: none; border: 0; padding: 12px 0; color: var(--text); cursor: pointer; }
+.project-copy h3 { font-size: clamp(24px, 2.6vw, 37px); line-height: 1.5; }
+.project-copy > p { max-width: 28em; font-size: 14px; }
+.project-role { font-size: 11px; color: var(--muted); margin-top: 20px; }
+.project-name { display: block; font-size: 10px; color: var(--muted); margin-top: 14px; }
+.preview-label { position: absolute; display: flex; align-items: center; gap: 24px; right: 16px; bottom: 16px; padding: 8px 13px; border-radius: 30px; background: var(--paper); font-size: 10px; color: var(--blue); box-shadow: 0 5px 20px #1d3a6410; }
+.timeline-body details > p { font-size: 13px; color: var(--muted); margin-top: 12px; }
+.timeline-entry { padding-bottom: 22px; }
+.timeline-body { padding-bottom: 22px; }
+.timeline-body h3 { margin-bottom: 8px; }
+.profile-dialog { width: min(650px, calc(100% - 32px)); max-height: calc(100dvh - 40px); border: 1px solid var(--line); border-radius: 20px; background: var(--paper); color: var(--text); padding: 0; box-shadow: 0 30px 100px #10284935; }
+.profile-dialog::backdrop { background: #10213880; backdrop-filter: blur(7px); }
+.profile-dialog-inner { position: relative; padding: 45px; }
+.profile-dialog h2 { font-size: 40px; margin-top: 18px; }
+.profile-alias { color: var(--blue); font-size: 17px; margin-top: 5px; }
+.profile-alias span { color: var(--line); padding-inline: 9px; }
+.profile-intro { font-size: 14px; line-height: 2; margin-top: 24px; color: var(--muted); }
+.dialog-close { position: absolute; right: 20px; top: 15px; width: 40px; height: 40px; font-size: 28px; border: 0; background: var(--soft); border-radius: 50%; color: var(--text); }
+.profile-facts { display: grid; gap: 15px; padding: 24px 0; margin-bottom: 8px; }
+.profile-facts > div { display: grid; grid-template-columns: 45px 1fr; gap: 15px; font-size: 12px; }
+.profile-facts dt { color: var(--muted); }
+.resume-heading .resume-alias { color: var(--blue); font-size: 12px; margin-bottom: 5px; }
+@media(max-width: 1000px) {
+  .hero { gap: 0; }
+  .hero .nickname-lockup h1 { font-size: 105px; }
+  .hero .hero-statement { font-size: 27px; }
+}
+@media(max-width: 800px) {
+  .hero .nickname-lockup h1 { font-size: 84px; }
+  .nickname-zh { font-size: 18px; }
+  .hero .hero-statement { font-size: 22px; }
+  .hero .hero-description { font-size: 12px; }
+  .project-copy h3 { font-size: 24px; }
+  .hero-actions { gap: 20px; }
+}
+@media(max-width: 590px) {
+  .hero { grid-template-columns: 1fr; padding-top: 36px; }
+  .hero .nickname-lockup h1 { font-size: clamp(84px, 23vw, 125px); }
+  .nickname-lockup { margin: 26px 0 22px; }
+  .nickname-zh { font-size: 19px; margin-top: 12px; }
+  .hero .hero-statement { font-size: 25px; }
+  .hero .hero-description { font-size: 13px; margin-top: 14px; }
+  .hero-graph { max-width: 420px; margin-inline: auto; }
+  .project-copy h3 { font-size: 27px; }
+  .project-role { margin-top: 15px; }
+  .profile-dialog-inner { padding: 34px 25px; }
+  .profile-dialog h2 { font-size: 34px; }
+  .profile-intro { font-size: 13px; }
+}
+@media print { .profile-dialog { display: none !important; } .resume-heading .resume-alias { font-size: 9px; } }

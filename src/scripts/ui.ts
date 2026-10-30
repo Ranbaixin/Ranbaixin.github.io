@@ -4,6 +4,37 @@ const root = document.documentElement;
 const store = (key: string, value: string) => { try { localStorage.setItem(key, value); } catch { /* Preferences remain usable for this page. */ } };
 const reduced = () => root.dataset.motion === 'reduce' || matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+const profileDialog = document.querySelector<HTMLDialogElement>('#profile-dialog');
+let profileOpener: HTMLButtonElement | null = null;
+document.querySelectorAll<HTMLButtonElement>('[data-profile-open]').forEach(button => {
+  if (!profileDialog || typeof profileDialog.showModal !== 'function') return;
+  button.hidden = false;
+  button.addEventListener('click', () => { profileOpener = button; profileDialog.showModal(); });
+});
+profileDialog?.addEventListener('close', () => profileOpener?.focus());
+profileDialog?.addEventListener('click', event => {
+  const rect = profileDialog.getBoundingClientRect();
+  if (event.target === profileDialog && (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom)) profileDialog.close();
+});
+
+document.querySelectorAll<HTMLElement>('[data-case-tabs]').forEach(tabs => {
+  const buttons = [...tabs.querySelectorAll<HTMLButtonElement>('[data-case-tab]')];
+  const panels = [...document.querySelectorAll<HTMLElement>('[data-case-panel]')];
+  tabs.hidden = false;
+  const activate = (button: HTMLButtonElement) => {
+    buttons.forEach(item => { item.setAttribute('aria-selected', String(item === button)); item.tabIndex = item === button ? 0 : -1; });
+    panels.forEach(panel => panel.hidden = panel.dataset.casePanel !== button.dataset.caseTab);
+  };
+  buttons.forEach((button, index) => {
+    button.addEventListener('click', () => activate(button));
+    button.addEventListener('keydown', event => {
+      const next = event.key === 'ArrowRight' ? (index + 1) % buttons.length : event.key === 'ArrowLeft' ? (index + buttons.length - 1) % buttons.length : event.key === 'Home' ? 0 : event.key === 'End' ? buttons.length - 1 : -1;
+      if (next >= 0) { event.preventDefault(); activate(buttons[next]); buttons[next].focus(); }
+    });
+  });
+  activate(buttons[0]);
+});
+
 const themeButton = document.querySelector<HTMLButtonElement>('[data-theme-toggle]');
 if (themeButton) {
   themeButton.hidden = false;

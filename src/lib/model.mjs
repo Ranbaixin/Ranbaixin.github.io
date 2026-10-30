@@ -13,7 +13,7 @@ export function validateContent(data) {
   const required = (object, fields, label) => fields.forEach(key => {
     if (typeof object?.[key] !== 'string' || !object[key].trim()) errors.push(`${label}.${key} is required`);
   });
-  required(data?.profile, ['name', 'email', 'intro'], 'profile');
+  required(data?.profile, ['name', 'nicknameEn', 'nicknameZh', 'email', 'intro'], 'profile');
   if (data?.profile?.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.profile.email)) errors.push('profile.email is invalid');
   required(data?.education, ['school', 'major'], 'education');
   if (!(data?.education?.expectedGraduation > data?.education?.enrolled)) errors.push('education years are invalid');
@@ -28,7 +28,9 @@ export function validateContent(data) {
     for (const key of ['responsibilities', 'outcomes', 'methods']) {
       if (!Array.isArray(project[key]) || !project[key].length || project[key].some(v => typeof v !== 'string' || !v.trim())) errors.push(`project.${key} is required`);
     }
-    const allowed = new Set(['slug', 'title', 'shortTitle', 'category', 'categoryLabel', 'start', 'period', 'role', 'summary', 'background', 'responsibilities', 'outcomes', 'methods', 'verification', 'reflection', 'number', 'theme']);
+    const approvedSamples = { 'cad-flow': 'cad-v1', 'output-forecast': 'energy-v1', 'wiring-query': 'wiring-v1' };
+    if (!project.demo || approvedSamples[project.demo.type] !== project.demo.sample || !project.demo.sample || Object.keys(project.demo).some(key => !['type', 'sample'].includes(key))) errors.push('project.demo must reference an approved public sample');
+    const allowed = new Set(['slug', 'title', 'shortTitle', 'category', 'categoryLabel', 'start', 'period', 'role', 'summary', 'background', 'responsibilities', 'outcomes', 'methods', 'verification', 'reflection', 'number', 'theme', 'demo']);
     for (const key of Object.keys(project)) if (!allowed.has(key)) errors.push(`private or unsupported project field: ${key}`);
   }
   if (/[A-Z]:[\\/]|\/opt\/|\/etc\/|-----BEGIN .*PRIVATE KEY|(?:token|password)\s*[:=]/i.test(JSON.stringify(data))) errors.push('private material cannot publish');

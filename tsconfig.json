@@ -2,5 +2,5 @@
   "extends": "astro/tsconfigs/strict",
   "compilerOptions": { "allowJs": true, "checkJs": false, "resolveJsonModule": true },
   "include": [".astro/types.d.ts", "**/*"],
-  "exclude": ["dist", "node_modules", "test-results"]
+  "exclude": ["dist", "dist-*", "node_modules", "test-results"]
 }

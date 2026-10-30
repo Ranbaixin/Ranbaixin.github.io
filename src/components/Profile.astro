@@ -1,0 +1,21 @@
+---
+import content from '../data/content.json';
+import { withBase } from '../lib/model.mjs';
+const link = (path = '') => withBase(import.meta.env.BASE_URL, path);
+---
+<dialog class="profile-dialog" id="profile-dialog" aria-labelledby="profile-title">
+  <div class="profile-dialog-inner">
+    <form method="dialog"><button class="dialog-close" aria-label="关闭个人资料">×</button></form>
+    <p class="eyebrow">ABOUT / 个人资料</p>
+    <h2 id="profile-title">{content.profile.name}</h2>
+    <p class="profile-alias">{content.profile.nicknameEn} <span>·</span> {content.profile.nicknameZh}</p>
+    <p class="profile-intro">{content.profile.intro}</p>
+    <dl class="profile-facts">
+      <div><dt>就读</dt><dd>{content.education.school} · {content.education.college}</dd></div>
+      <div><dt>专业</dt><dd>{content.education.major} · {content.education.enrolled} 级</dd></div>
+      <div><dt>毕业</dt><dd>预计 {content.education.expectedGraduation} 年毕业</dd></div>
+      <div><dt>指导</dt><dd>{content.profile.advisor} 老师 · 数据科学与机器学习</dd></div>
+    </dl>
+    <a class="button button-primary" href={link('resume/')}>查看完整简历 ↗</a>
+  </div>
+</dialog>
