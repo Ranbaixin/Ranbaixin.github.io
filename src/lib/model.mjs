@@ -28,7 +28,7 @@ export function validateContent(data) {
     for (const key of ['responsibilities', 'outcomes', 'methods']) {
       if (!Array.isArray(project[key]) || !project[key].length || project[key].some(v => typeof v !== 'string' || !v.trim())) errors.push(`project.${key} is required`);
     }
-    const approvedSamples = { 'cad-flow': 'cad-v1', 'output-forecast': 'energy-v1', 'wiring-query': 'wiring-v1' };
+    const approvedSamples = { 'cad-flow': 'cad-v1', 'plate-split': 'cad-split-v1', 'output-forecast': 'energy-weather-v1', 'wiring-query': 'wiring-v2' };
     if (!project.demo || approvedSamples[project.demo.type] !== project.demo.sample || !project.demo.sample || Object.keys(project.demo).some(key => !['type', 'sample'].includes(key))) errors.push('project.demo must reference an approved public sample');
     const allowed = new Set(['slug', 'title', 'shortTitle', 'category', 'categoryLabel', 'start', 'period', 'role', 'summary', 'background', 'responsibilities', 'outcomes', 'methods', 'verification', 'reflection', 'number', 'theme', 'demo']);
     for (const key of Object.keys(project)) if (!allowed.has(key)) errors.push(`private or unsupported project field: ${key}`);

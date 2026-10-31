@@ -1,40 +1,48 @@
 ---
-import { buildForecast } from './model.mjs';
-const forecast = buildForecast();
+import { buildWeatherForecast } from './model.mjs';
+interface Props { compact?: boolean; }
+const { compact = false } = Astro.props;
+const forecast = buildWeatherForecast();
 const x = (i: number) => 68 + i / 23 * 660;
-const y = (value: number) => 355 - value * 285;
+const baseline = compact ? 235 : 355;
+const y = (value: number) => baseline - value * (compact ? 170 : 285);
 const path = (key: 'actual' | 'predicted') => forecast.points.map((p, i) => `${i ? 'L' : 'M'}${x(i)},${y(p[key])}`).join(' ');
 ---
-<section class="experience experience-energy" data-experience="output-forecast" aria-label="出力预测交互体验">
+<section class="experience experience-energy" data-experience="output-forecast" data-variant={compact ? 'compact' : 'full'} data-power-kind="wind" aria-label="出力预测交互体验">
   <div class="experience-topline"><span class="demo-label">生成样例 / FORECAST EXPLORER</span><button class="reset-button" data-demo-reset hidden type="button">重置体验 ↺</button></div>
   <div class="experience-layout">
     <div class="demo-visual">
-      <div class="visual-heading"><span>一条曲线，怎样被评价？</span><span class="mono">NORMALIZED OUTPUT</span></div>
-      <svg class="forecast-canvas" viewBox="0 0 780 440" role="group" aria-label="归一化出力参考与演示预测曲线">
+      <div class="visual-heading"><span data-energy-heading>风速变化，如何传递到出力？</span><span class="mono">WEATHER → POWER</span></div>
+      <svg class="weather-canvas" viewBox="0 0 780 130" role="img" aria-label="输入气象时序"><path d="M68 100H728" class="chart-grid"/><path data-weather-path d={forecast.points.map((p, i) => `${i ? 'L' : 'M'}${x(i)},${105 - p.weather / 25 * 80}`).join(' ')} class="weather-line"/><text x="68" y="27" class="svg-note" data-weather-axis>气象输入 / 风速 m/s</text><text x="728" y="120" text-anchor="end" class="svg-note" data-weather-window>T+1 → T+24 h</text></svg>
+      <svg class="forecast-canvas" viewBox={compact ? '0 0 780 300' : '0 0 780 440'} role="group" aria-label="归一化出力参考与演示预测曲线">
         {[0, .25, .5, .75, 1].map(value => <g><line x1="68" y1={y(value)} x2="728" y2={y(value)} class="chart-grid"/><text x="48" y={y(value) + 4} text-anchor="end" class="axis-label">{value.toFixed(2)}</text></g>)}
         <text x="68" y="40" class="svg-note">归一化出力 / 0—1</text>
-        <path data-forecast-area class="forecast-area" d={`${path('actual')} L728,355 L68,355 Z`}/>
+        <path data-forecast-area class="forecast-area" d={`${path('actual')} L728,${baseline} L68,${baseline} Z`}/>
         <path data-forecast-reference class="forecast-reference" d={path('actual')} fill="none"/>
         <path data-forecast-prediction class="forecast-prediction" d={path('predicted')} fill="none"/>
-        <line data-forecast-cursor class="forecast-cursor" x1="68" x2="68" y1="62" y2="355"/>
+        <line data-forecast-cursor class="forecast-cursor" x1="68" x2="68" y1="62" y2={baseline}/>
         <g data-forecast-points>{forecast.points.map((point, i) => <circle data-forecast-point={point.hour} cx={x(i)} cy={y(point.actual)} r="7" class="forecast-point"/>)}</g>
-        <g data-forecast-axis><text x="68" y="389" class="axis-label">T+1 h</text><text x="398" y="389" class="axis-label" text-anchor="middle">T+12 h</text><text x="728" y="389" class="axis-label" text-anchor="end">T+24 h</text></g>
+        <g data-forecast-axis><text x="68" y={baseline + 34} class="axis-label">T+1 h</text><text x="398" y={baseline + 34} class="axis-label" text-anchor="middle">T+12 h</text><text x="728" y={baseline + 34} class="axis-label" text-anchor="end">T+24 h</text></g>
       </svg>
       <div class="chart-legend"><span><i class="legend-reference"></i>样例参考</span><span><i class="legend-prediction"></i><span data-method-legend>演示预测</span></span><span class="legend-hint">点选曲线查看误差</span></div>
     </div>
     <aside class="demo-controls" data-demo-controls hidden aria-label="预测比较控件">
+      <label>出力类型<select data-energy-kind aria-label="出力类型"><option value="wind">风电 · 风速驱动</option><option value="solar">光伏 · 辐照驱动</option></select></label>
       <label>生成场景<select aria-label="生成场景" data-forecast-scenario><option value="steady">平稳过程</option><option value="ramp" selected>持续爬坡</option><option value="volatile">快速波动</option></select></label>
-      <label>评价窗口<select aria-label="评价窗口" data-forecast-horizon><option value="4">未来 4 小时</option><option value="12">未来 12 小时</option><option value="24" selected>未来 24 小时</option></select></label>
-      <label>预测方案<select aria-label="预测方案" data-forecast-method><option value="sample">演示预测</option><option value="persistence">持续性基线</option></select></label>
-      <div class="control-divider"></div>
-      <div class="point-heading"><span class="control-eyebrow">选中时刻</span><strong data-point-hour>T+1 h</strong></div>
-      <label class="range-label">时间点<input aria-label="时间点" data-forecast-time type="range" min="1" max="24" step="1" value="1"/></label>
-      <dl class="point-values" aria-live="polite"><div><dt>参考</dt><dd data-point-actual>{forecast.points[0].actual.toFixed(4)}</dd></div><div><dt>预测</dt><dd data-point-predicted>{forecast.points[0].predicted.toFixed(4)}</dd></div><div><dt>误差</dt><dd data-point-error>{(forecast.points[0].predicted - forecast.points[0].actual).toFixed(4)}</dd></div></dl>
+      <label data-wind-controls>风速修正 <strong data-wind-value>+0.0 m/s</strong><input type="range" min="-3" max="3" step="0.5" value="0" data-weather-wind aria-label="风速修正"/></label>
+      <label data-solar-controls hidden>辐照倍率 <strong data-solar-value>1.00×</strong><input type="range" min="0.25" max="1.25" step="0.05" value="1" data-weather-solar aria-label="辐照倍率"/></label>
+      <label data-solar-controls hidden data-full-only>组件温度 <strong data-temperature-value>25 °C</strong><input type="range" min="-10" max="70" step="1" value="25" data-weather-temperature aria-label="组件温度"/></label>
+      <label data-full-only>评价窗口<select aria-label="评价窗口" data-forecast-horizon><option value="4">未来 4 小时</option><option value="12">未来 12 小时</option><option value="24" selected>未来 24 小时</option></select></label>
+      <label data-full-only>预测方案<select aria-label="预测方案" data-forecast-method><option value="sample">演示预测</option><option value="persistence">持续性基线</option></select></label>
+      <div class="control-divider" data-full-only></div>
+      <div class="point-heading" data-full-only><span class="control-eyebrow">选中时刻</span><strong data-point-hour>T+1 h</strong></div>
+      <label class="range-label"><span class="range-heading">时间点 <strong data-time-caption>T+1 h</strong></span><input aria-label="时间点" data-forecast-time type="range" min="1" max="24" step="1" value="1"/></label>
+      <dl class="point-values" aria-live="polite"><div><dt>气象</dt><dd data-point-weather>{forecast.points[0].weather.toFixed(1)} m/s</dd></div><div><dt>参考</dt><dd data-point-actual>{forecast.points[0].actual.toFixed(4)}</dd></div><div><dt>预测</dt><dd data-point-predicted>{forecast.points[0].predicted.toFixed(4)}</dd></div><div><dt>误差</dt><dd data-point-error>{(forecast.points[0].predicted - forecast.points[0].actual).toFixed(4)}</dd></div></dl>
     </aside>
     <div class="demo-results">
       <div class="metric-grid" aria-live="polite"><div><span>MAE <small>平均绝对误差</small></span><strong data-metric="mae">{forecast.metrics.mae.toFixed(4)}</strong></div><div><span>RMSE <small>均方根误差</small></span><strong data-metric="rmse">{forecast.metrics.rmse.toFixed(4)}</strong></div><div><span>Bias <small>平均偏差</small></span><strong data-metric="bias">{forecast.metrics.bias.toFixed(4)}</strong></div></div>
       <p class="demo-status" data-forecast-note>出力持续爬坡时，固定起点的基线会逐步滞后。</p>
-      <details class="method-details"><summary>这些数值怎么来？</summary><p>参考与预测曲线由确定性函数生成，用于体验评价方法。持续性基线固定使用 T+0 的值，评价只使用 T+1 起的所选时段。误差方向为“预测 − 参考”；三项指标均使用归一化出力单位。</p><p>此处展示样例计算。实际场站模型、气象比较研究及电价回测的进展，在“成果与收获”中分别说明。</p></details>
+      <details class="method-details" data-full-only><summary>这些数值怎么来？</summary><p>气象与参考出力均为独立生成的公开样例，调整输入不会改写参考值。风电教学曲线采用 3／12／25 m/s 的切入、额定、切出参数，额定前按风速立方归一化；光伏采用“辐照 ÷ 1000 × [1 − 0.004 ×（组件温度 − 25）]”，出力限制在 0—1。参数不代表真实设备或已训练模型。</p><p>持续性基线固定使用 T+0 的参考出力，评价只使用 T+1 起的所选时段。误差方向为“预测 − 参考”。真实气象研究、场站出力验证与电价回测在“成果与收获”分别说明。</p></details>
     </div>
   </div>
 </section>

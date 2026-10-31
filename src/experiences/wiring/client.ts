@@ -1,4 +1,4 @@
-import { wiringSample, queryConnections, searchPorts } from './model.mjs';
+import { wiringSample, queryConnections, searchPorts, tracePath } from './model.mjs';
 import { requireElement as get, node, enhance } from '../dom';
 
 export function mount(root: HTMLElement) {
@@ -16,6 +16,10 @@ export function mount(root: HTMLElement) {
   function resetEvidence() {
     evidence.replaceChildren(node('span', '图纸依据', 'control-eyebrow'), node('p', '选择一条结果的“查看依据”，定位它在样例图中的关系。'));
     root.querySelectorAll('[data-edge-id]').forEach(item => item.classList.remove('evidence-active'));
+    root.querySelectorAll('[data-drawing-page]').forEach(item => item.classList.remove('evidence-page'));
+    get<SVGElement>(root, '[data-evidence-focus]').setAttribute('visibility', 'hidden');
+    root.querySelectorAll('[data-edge-id]').forEach(item => item.classList.remove('traced'));
+    get(root, '[data-trace-summary]').textContent = '点击图中端口作为起点，再选择目标追线。';
   }
   function renderSearch() {
     const matches = searchPorts(wiringSample, search.value);
@@ -31,6 +35,7 @@ export function mount(root: HTMLElement) {
   }
   function render() {
     const result = queryConnections(wiringSample, selected, mode);
+    get<HTMLSelectElement>(root, '[data-trace-source]').value = selected;
     resetEvidence(); renderSearch();
     get(root, '[data-wiring-selection]').textContent = `${result.port.label} · 样例页 ${result.port.page} · ${result.port.description}`;
     get(root, '[data-wiring-result-title]').textContent = `${result.port.label} 的${labels[mode]}`;
@@ -79,8 +84,26 @@ export function mount(root: HTMLElement) {
     if (!edge) return;
     evidence.replaceChildren(node('span', states[edge.status], 'control-eyebrow'), node('h4', edge.evidence), node('p', edge.note));
     root.querySelectorAll<SVGGElement>('[data-edge-id]').forEach(item => item.classList.toggle('evidence-active', item.dataset.edgeId === edge.id));
+    const ends = wiringSample.ports.filter(port => port.id === edge.a || port.id === edge.b);
+    const focus = get<SVGElement>(root, '[data-evidence-focus]');
+    focus.setAttribute('visibility', 'visible');
+    focus.setAttribute('x', String(Math.min(...ends.map(p => p.x)) - 26));
+    focus.setAttribute('y', String(Math.min(...ends.map(p => p.y)) - 26));
+    focus.setAttribute('width', String(Math.max(...ends.map(p => p.x)) - Math.min(...ends.map(p => p.x)) + 52));
+    focus.setAttribute('height', String(Math.max(...ends.map(p => p.y)) - Math.min(...ends.map(p => p.y)) + 52));
+    root.querySelectorAll<SVGElement>('[data-drawing-page]').forEach(item => item.classList.toggle('evidence-page', ends.some(port => port.page === item.dataset.drawingPage)));
     evidence.focus({ preventScroll: true });
   });
-  get(root, '[data-demo-reset]').addEventListener('click', () => { selected = 'p1'; mode = 'direct'; search.value = ''; render(); });
+  get<HTMLSelectElement>(root, '[data-trace-source]').addEventListener('change', event => { selected = (event.target as HTMLSelectElement).value; render(); });
+  get(root, '[data-trace-start]').addEventListener('click', () => {
+    mode = 'network'; render();
+    const path = tracePath(wiringSample, selected, get<HTMLSelectElement>(root, '[data-trace-target]').value);
+    get(root, '[data-trace-summary]').textContent = path ? `${path.portIds.map(id => wiringSample.ports.find(p => p.id === id)!.label).join(' → ')} · 样例页 ${path.pages.join(' ↔ ')}` : '未找到已确认路径；待核、冲突与器件内部关系不参与导通推断。';
+    root.querySelectorAll<SVGElement>('[data-edge-id]').forEach(item => {
+      const index = path?.edgeIds.indexOf(item.dataset.edgeId!) ?? -1;
+      item.classList.toggle('traced', index >= 0); item.style.setProperty('--trace-order', String(Math.max(0, index)));
+    });
+  });
+  get(root, '[data-demo-reset]').addEventListener('click', () => { selected = 'p1'; mode = 'direct'; search.value = ''; get<HTMLSelectElement>(root, '[data-trace-target]').value = 'p4'; render(); });
   render(); enhance(root);
 }

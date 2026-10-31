@@ -1,0 +1,40 @@
+---
+import { createSplitSample, splitPlates, projectSplit } from './model.mjs';
+interface Props { compact?: boolean; }
+const { compact = false } = Astro.props;
+const sample = createSplitSample();
+const result = splitPlates(sample);
+const geometry = projectSplit(sample);
+const points = (p: number[][]) => p.map(point => point.join(',')).join(' ');
+---
+<section class="experience experience-splitting" data-experience="plate-split" data-variant={compact ? 'compact' : 'full'} aria-label="构件拆板交互体验">
+  <div class="experience-topline"><span class="demo-label">重建样例 / MEMBER → PLATES</span><button class="reset-button" data-demo-reset hidden type="button">重置体验 ↺</button></div>
+  <div class="experience-layout">
+    <div class="demo-visual split-visual">
+      <div class="visual-heading"><span data-split-scene-title>BH · 三块板，组成一根构件。</span><span class="mono" data-split-scene-step>01 / 合拢</span></div>
+      <svg class="split-canvas" data-split-drawing viewBox="0 0 720 420" role="group" aria-label="BH 构件与独立板件，点击或用下方按钮选中板件">
+        <defs><pattern id={compact ? 'split-grid-home' : 'split-grid-detail'} width="30" height="30" patternUnits="userSpaceOnUse"><path d="M30 0H0V30" class="split-grid"/></pattern></defs>
+        <rect width="720" height="420" fill={`url(#${compact ? 'split-grid-home' : 'split-grid-detail'})`}/>
+        <path d="M65 350H655M360 35V385" class="split-guide"/>
+        <ellipse cx="360" cy="346" rx="220" ry="20" class="split-shadow"/>
+        <g data-split-geometry>{geometry.map(plate => <g data-plate-id={plate.id} class:list={['split-plate', `plate-${plate.id}`, { selected: plate.id === 'top' }]}><polygon class="plate-side" points={points(plate.side)}/><polygon class="plate-front" points={points(plate.front)}/>{plate.holes.map(hole => <circle class="plate-hole" cx={hole.point[0]} cy={hole.point[1]} r="3"/>)}<text class="plate-tag" x={plate.labelPoint[0]} y={plate.labelPoint[1]} text-anchor="middle">{plate.label}</text></g>)}</g>
+        <text x="34" y="394" class="svg-note" data-split-canvas-note>BH / H400 × 200 · L1200 mm</text>
+      </svg>
+      <div class="object-caption"><span class="status-dot"></span><span data-split-selection>上翼缘板 · 1200 × 200 × 12 mm</span></div>
+    </div>
+    <aside class="demo-controls split-controls" data-demo-controls hidden aria-label="构件拆板控件">
+      <label>构件样例<select data-split-kind aria-label="构件样例"><option value="bh">BH · 焊接 H 型构件</option><option value="box">BOX · 箱形构件</option>{!compact && <option value="incomplete">待核 · 缺少长度尺寸</option>}</select></label>
+      <div class="split-actions" role="group" aria-label="拆板展示步骤"><button type="button" data-split-action="0" aria-pressed="true">合拢</button><button type="button" data-split-action="0.5" aria-pressed="false">拆开</button><button type="button" data-split-action="1" aria-pressed="false">展平</button></div>
+      <label class="range-label">拆解进度<input type="range" min="0" max="100" value="0" step="1" data-split-phase aria-label="拆解进度"/></label>
+      <div class="split-part-list" data-split-parts role="group" aria-label="选择独立板件">{result.plates.map(plate => <button type="button" data-split-part={plate.id} aria-pressed={plate.id === 'top'}><i class={`part-dot plate-${plate.id}`}></i>{plate.label}</button>)}</div>
+      <p class="control-hint" data-split-status>3 块独立板件 · 可查看展开结果</p>
+    </aside>
+    <div class="demo-results" data-full-only>
+      <div class="split-comparison-heading"><div><span class="control-eyebrow">NORMAL / ALLOWANCE</span><h3>同一块板，两份结果。</h3></div><label data-demo-action hidden>演示余量 <strong data-allowance-value>0 mm</strong><input type="range" min="0" max="20" step="5" value="0" data-split-allowance aria-label="演示余量"/></label></div>
+      <svg class="split-comparison" data-split-comparison viewBox="0 0 720 300" role="img" aria-label="选中板件的普通与余量轮廓对比，孔位保持不变"><g data-compare-geometry><rect x="80" y="50" width={1200 / 1220 * 560} height={200 / 1220 * 560} class="compare-normal"/>{result.plates[0].holes.map(hole => <circle data-compare-hole cx={80 + hole.x / 1220 * 560} cy={50 + hole.y / 1220 * 560} r={9 / 1220 * 560}/>)}</g><text x="80" y="270" class="svg-note">实线：普通轮廓 · 虚线：余量轮廓 · 孔位与孔径保持不变</text></svg>
+      <div class="split-result-bar"><p data-split-dimensions>普通长度 1200 mm → 余量长度 1200 mm · 板宽 200 mm</p><button type="button" class="small-button" data-split-generate data-demo-action hidden>核对拆板结果</button></div>
+      <output data-split-output class="demo-status" aria-live="polite">选择板件，核对尺寸与普通／余量结果。</output>
+      <details class="method-details"><summary>拆板过程与项目中的位置</summary><p>构件按类型进入拆板，形成独立物理板件，再核对普通与余量结果。本体验只处理重新构建的直段 BH／BOX，不解析上传的 CAD 图纸。余量为 0—20 mm 的教学参数，未使用企业生产规则。</p><p>拆板是团队项目的核心流程。我的工作仍是图纸预处理、下游软件集成和余料数据库；具体贡献见“我的职责”。</p></details>
+    </div>
+  </div>
+</section>

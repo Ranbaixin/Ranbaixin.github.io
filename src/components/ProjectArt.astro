@@ -1,31 +1,47 @@
 ---
+import { createSplitSample, splitPlates, projectSplit } from '../experiences/splitting/model.mjs';
+import { buildWeatherForecast } from '../experiences/energy/model.mjs';
+import { wiringSample } from '../experiences/wiring/model.mjs';
 interface Props { theme: string; }
 const { theme } = Astro.props;
+const sample = createSplitSample('bh');
+const plates = splitPlates(sample).plates;
+const geometry = projectSplit(sample, .36);
+const forecast = buildWeatherForecast();
+const graphPath = (key: 'actual' | 'predicted') => forecast.points.map((p, i) => `${i ? 'L' : 'M'}${280 + i / 23 * 380},${305 - p[key] * 195}`).join(' ');
+const pts = (points: number[][]) => points.map(p => p.join(',')).join(' ');
+const port = (id: string) => wiringSample.ports.find(p => p.id === id)!;
 ---
 <div class:list={['project-art', `art-${theme}`]} aria-hidden="true">
-  <svg viewBox="0 0 600 340" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <defs><pattern id={`grid-${theme}`} width="24" height="24" patternUnits="userSpaceOnUse"><path d="M24 0H0V24" class="art-grid"/></pattern></defs>
-    <rect width="600" height="340" fill={`url(#grid-${theme})`}/>
+  <svg viewBox="0 0 720 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs><pattern id={`grid-${theme}`} width="26" height="26" patternUnits="userSpaceOnUse"><path d="M26 0H0V26" class="art-grid"/></pattern></defs>
+    <rect width="720" height="420" fill={`url(#grid-${theme})`}/>
     {theme === 'cad' ? <>
-      <path d="M120 110L280 52L453 133L293 200Z M120 110V222L293 296V200 M453 133V238L293 296 M280 52V162L453 238 M120 222L280 162L293 169" class="art-line"/>
-      <path d="M180 135L284 98L391 147L287 185Z M180 135V198L287 246V185 M391 147V207L287 246" class="art-line art-secondary"/>
-      <path d="M92 90L255 30M470 130L490 138M96 239L265 312" class="art-dimension"/>
-      <circle cx="120" cy="110" r="5" class="art-point"/><circle cx="293" cy="200" r="5" class="art-point"/><circle cx="453" cy="133" r="5" class="art-point"/>
-      <text x="32" y="45">01 / CAD WORKFLOW</text><text x="390" y="305">INPUT → PROCESS → DATA</text>
+      <text x="35" y="45">01 / BH → INDEPENDENT PLATES</text>
+      <g transform="translate(-25 40) scale(.82)">{geometry.map(plate => <g class={`split-plate plate-${plate.id}`}><polygon points={pts(plate.side)} class="plate-side"/><polygon points={pts(plate.front)} class="plate-front"/>{plate.holes.map(h => <circle cx={h.point[0]} cy={h.point[1]} r="3" class="plate-hole"/>)}</g>)}</g>
+      <path d="M414 195H458M449 186L458 195L449 204" class="art-line"/>
+      {plates.map((plate, i) => <g><rect x="495" y={110 + i * 76} width="175" height={plate.role === 'web' ? 48 : 29} rx="2" class="compare-normal"/><text x="495" y={99 + i * 76}>{plate.label} / {plate.thickness} mm</text><circle cx="508" cy={124 + i * 76} r="3" class="art-point"/><circle cx="655" cy={124 + i * 76} r="3" class="art-point"/></g>)}
+      <text x="40" y="366">ASSEMBLE → SPLIT → VERIFY</text><text x="498" y="366">L1200 / 3 PLATES</text>
     </> : theme === 'energy' ? <>
-      <path d="M70 70V268H540" class="art-line art-secondary"/>
-      <path d="M74 232C115 226 127 146 171 164S231 225 277 165S326 78 371 119S426 205 472 122S513 110 538 77" class="art-line"/>
-      <path d="M74 211C115 207 132 168 175 180S235 199 277 150S331 102 373 137S436 172 476 135S514 104 538 108" class="art-prediction"/>
-      <path d="M74 232C115 226 127 146 171 164S231 225 277 165S326 78 371 119S426 205 472 122S513 110 538 77V268H74Z" class="art-area"/>
-      <circle cx="277" cy="165" r="6" class="art-point"/><path d="M277 60V268" class="art-dimension"/>
-      <text x="32" y="45">02 / FORECAST RESEARCH</text><text x="346" y="305">OBSERVE → ALIGN → EVALUATE</text>
+      <text x="35" y="45">02 / WEATHER → POWER</text>
+      <path d="M118 300V156M113 300H145M118 156L83 193M118 156L168 173M118 156L104 105" class="art-line"/><circle cx="118" cy="156" r="7" class="art-point"/>
+      <text x="57" y="337">WIND INPUT</text><text x="61" y="357">9.6 m/s</text>
+      <path d="M194 205H242M234 197L242 205L234 213" class="art-line"/>
+      <path d="M280 90V305H660" class="art-line art-secondary"/>
+      <path d={graphPath('actual')} class="art-line"/><path d={graphPath('predicted')} class="art-prediction"/>
+      <text x="280" y="337">T+1 → T+24 h</text><text x="487" y="337">MAE {forecast.metrics.mae.toFixed(3)}</text>
+      <text x="280" y="365">INPUT → FORECAST → EVALUATE</text>
     </> : <>
-      <path d="M80 100H218V172H390V244H525M80 244H175V172M302 172V85H492M390 172V108H527" class="art-line"/>
-      <rect x="60" y="80" width="40" height="40" rx="5" class="art-box"/><rect x="60" y="224" width="40" height="40" rx="5" class="art-box"/>
-      <rect x="282" y="65" width="40" height="40" rx="5" class="art-box"/><rect x="505" y="88" width="40" height="40" rx="5" class="art-box"/><rect x="505" y="224" width="40" height="40" rx="5" class="art-box"/>
-      <circle cx="218" cy="172" r="8" class="art-point"/><circle cx="302" cy="172" r="8" class="art-point"/><circle cx="390" cy="172" r="8" class="art-point"/>
-      <text x="32" y="45">03 / DRAWING CONNECTIONS</text><text x="338" y="305">DRAWING → EVIDENCE → QUERY</text>
+      <text x="35" y="45">03 / CROSS-PAGE TRACE</text>
+      <g transform="translate(4 28) scale(.9 .78)">
+        <rect x="35" y="65" width="490" height="350" rx="6" class="drawing-sheet"/><rect x="575" y="65" width="170" height="350" rx="6" class="drawing-sheet"/>
+        {wiringSample.edges.map(edge => <path d={`M${port(edge.a).x} ${port(edge.a).y}L${port(edge.b).x} ${port(edge.b).y}`} class:list={['art-line', { 'art-dimension': edge.status !== 'verified' || edge.kind === 'component', 'art-secondary': edge.status !== 'verified' || edge.kind === 'component' }]}/>)}
+        <rect x="650" y="224" width="60" height="45" class="device-symbol"/>
+        {wiringSample.ports.map(p => <g><circle cx={p.x} cy={p.y} r="8" class="art-point"/><text x={p.x} y={p.y - 25} text-anchor="middle">{p.label}</text></g>)}
+        <text x="55" y="100">PAGE 01</text><text x="595" y="100">PAGE 02</text>
+      </g>
+      <text x="40" y="381">PORT → PATH → DRAWING EVIDENCE</text>
     </>}
   </svg>
-  <span class="art-caption">{theme === 'cad' ? '图纸流转示意' : theme === 'energy' ? '研究方法示意 · 非实测数据' : '端口与连接关系示意'}</span>
+  <span class="art-caption">{theme === 'cad' ? 'BH 拆板与展开 · 重建样例' : theme === 'energy' ? '生成气象样例 · 教学出力计算' : '双页追线与图纸定位 · 重建样例'}</span>
 </div>

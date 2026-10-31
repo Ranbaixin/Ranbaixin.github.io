@@ -64,7 +64,7 @@ test('mobile layout and system reduced motion preserve readable content', async 
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBeTruthy();
     await expect(page.locator('#projects h2')).toBeVisible();
   }
-  await expect(page.locator('.graph-path')).toHaveCSS('animation-name', 'none');
+  expect(await page.locator('[data-home-workbench]').evaluate(el => el.getAnimations({ subtree: true }).length)).toBe(0);
 });
 
 test('without JavaScript the resume, full project list, navigation and email remain usable', async ({ browser }) => {
@@ -88,6 +88,10 @@ test('backup pages make no external requests for their core content', async ({ p
     return route.continue();
   });
   await page.goto(url());
+  for (const name of ['气象与出力', '跨页追线']) {
+    await page.getByRole('tab', { name }).click();
+    await expect(page.locator('[data-home-panel]:not([hidden]) [data-experience]')).toHaveAttribute('data-enhanced', 'true');
+  }
   await page.getByRole('button', { name: '数据科学 01' }).click();
   await expect(page.locator('[data-project-category]:visible')).toHaveCount(1);
   await page.goto(url('resume/'));

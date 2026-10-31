@@ -33,5 +33,6 @@
     color-scheme:light;
     --bg:#fff;--paper:#fff;--text:#192c49;--muted:#61728d;
     --blue:#275fe7;--blue-deep:#1948ba;--line:#dbe4f1;
+    --soft:#eaf1ff;--graph:#4777d7;--header:rgba(246,249,255,.94);
   }
 }

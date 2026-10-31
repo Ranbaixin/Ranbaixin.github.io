@@ -51,3 +51,23 @@ export function queryConnections(sample, portId, mode = 'direct') {
   }
   return { port, edges, portIds: [...new Set([portId, ...edges.flatMap(edge => [edge.a, edge.b])])] };
 }
+
+/** Ordered path and drawing pages; a relation inside a device is never a conductor. */
+export function tracePath(sample, sourceId, targetId) {
+  if (![sourceId, targetId].every(id => sample.ports.some(p => p.id === id))) return null;
+  const queue = [sourceId], visited = new Set(queue), previous = new Map();
+  for (let i = 0; i < queue.length && !visited.has(targetId); i++) {
+    for (const edge of sample.edges.filter(e => e.status === 'verified' && e.kind !== 'component')) {
+      const next = edge.a === queue[i] ? edge.b : edge.b === queue[i] ? edge.a : null;
+      if (!next || visited.has(next)) continue;
+      visited.add(next); previous.set(next, { port: queue[i], edge: edge.id }); queue.push(next);
+    }
+  }
+  if (!visited.has(targetId)) return null;
+  const portIds = [targetId], edgeIds = [];
+  while (portIds[0] !== sourceId) {
+    const step = previous.get(portIds[0]);
+    portIds.unshift(step.port); edgeIds.unshift(step.edge);
+  }
+  return { portIds, edgeIds, pages: [...new Set(portIds.map(id => sample.ports.find(p => p.id === id).page))] };
+}
