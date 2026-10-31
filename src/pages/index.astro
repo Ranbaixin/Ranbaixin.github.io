@@ -6,9 +6,9 @@ import content from '../data/content.json';
 import { withBase } from '../lib/model.mjs';
 const link = (path = '') => withBase(import.meta.env.BASE_URL, path);
 const teasers: Record<string, { title: string; line: string; action: string }> = {
-  'dwg-agent': { title: '让图纸，进入流程。', line: '选中一块余料，走过校验、交接与入库。', action: '体验图纸流程' },
-  'renewable-forecasting': { title: '让预测，经得起比较。', line: '换一个场景，看看曲线与误差怎样变化。', action: '探索预测曲线' },
-  'electrical-drawings': { title: '让连接，有据可循。', line: '从一个端口出发，找到连接和图纸依据。', action: '查询端口连接' },
+  'dwg-agent': { title: '把构件，拆成独立板件。', line: '从 BH 到 BOX，拆开、展平，再核对孔位与余量。', action: '进入拆板工作台' },
+  'renewable-forecasting': { title: '从气象变化，看见出力。', line: '调整风速或辐照，观察预测与误差如何变化。', action: '探索气象与出力' },
+  'electrical-drawings': { title: '沿着连接，跨页找到依据。', line: '从端子出发，追踪连接，并定位对应图纸。', action: '进入跨页追线' },
 };
 ---
 <Base>
@@ -24,11 +24,11 @@ const teasers: Record<string, { title: string; line: string; action: string }> =
     <div class="hero-bottom"><span class="mono">IDEAS INTO PRACTICE / 2026</span><div>{content.profile.focus.map((focus, i) => <><span>{focus}</span>{i < 2 && <span class="focus-divider" aria-hidden="true">/</span>}</>)}</div><a href="#projects">向下探索 ↓</a></div>
   </section>
 
-  <div class="kinetic-ribbon" data-motion-ribbon aria-hidden="true"><div class="kinetic-ribbon-track"><span>THINK</span><i>↗</i><span>BUILD</span><i>✳</i><span>EXPLORE</span><i>↗</i><span>THINK</span><i>✳</i><span>BUILD</span><i>↗</i><span>EXPLORE</span></div></div>
+  <div class="kinetic-ribbon" data-motion-ribbon aria-hidden="true" hidden><div class="kinetic-ribbon-track"><div class="kinetic-ribbon-group"><span>拆板</span><i>↗</i><span>预测</span><i>✳</i><span>追线</span><i>↗</i></div></div></div>
 
   <section id="projects" class="section projects-section wrap" aria-labelledby="projects-title">
     <div class="section-label"><span>01</span> 精选实践 <span class="mono">SELECTED WORK</span></div>
-    <div class="section-heading"><h2 id="projects-title" data-reveal>从一个操作，<br/>走近一个项目。</h2><p class="section-intro">真实流程，重建样例。<br/>亲手试一试，再了解背后的工作。</p></div>
+    <div class="section-heading"><h2 id="projects-title" data-reveal>从一个操作，走近一个项目。</h2><p class="section-intro">探索核心流程，了解我负责的工作。</p></div>
     <div class="project-toolbar" data-filters hidden><div class="filter-buttons" role="group" aria-label="按方向筛选项目"><button type="button" data-filter="all" aria-pressed="true">全部项目 <span>03</span></button><button type="button" data-filter="engineering" aria-pressed="false">工程自动化 <span>02</span></button><button type="button" data-filter="data" aria-pressed="false">数据科学 <span>01</span></button></div><span class="filter-count" data-filter-count aria-live="polite">展示 3 个项目</span></div>
     <div class="project-list">{content.projects.map(project => <article class="project-row" data-project-category={project.category} data-reveal>
       <a class="project-visual-link" href={link(`projects/${project.slug}/`)} aria-label={`进入${project.title}体验`}><ProjectArt theme={project.theme} /><span class="preview-label">可交互体验 <span aria-hidden="true">↗</span></span></a>

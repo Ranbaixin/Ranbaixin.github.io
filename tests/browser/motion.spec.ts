@@ -2,96 +2,86 @@ import { test, expect } from '@playwright/test';
 const base = process.env.TEST_BASE || '/';
 const url = (path = '') => base + path;
 
-test('hero scenes switch by button and keyboard while project links remain usable', async ({ page }) => {
+test('home tabs support arrows and native links enter the real project', async ({ page }) => {
   await page.goto(url());
-  const stage = page.locator('[data-motion-stage]');
-  await expect(stage).toHaveAttribute('data-render', 'canvas');
-  await page.getByRole('button', { name: '预测曲面', exact: true }).click();
-  await expect(stage).toHaveAttribute('data-scene', 'energy');
-  await expect(page.locator('[data-scene-caption]')).toContainText('预测');
-  await page.getByRole('button', { name: '连接网络', exact: true }).focus();
-  await page.keyboard.press('Enter');
-  await expect(stage).toHaveAttribute('data-scene', 'wiring');
+  await page.getByRole('tab', { name: '拆板工作台' }).focus();
+  await page.keyboard.press('ArrowRight');
+  await expect(page.getByRole('tab', { name: '气象与出力' })).toBeFocused();
+  await expect(page.locator('[data-home-panel="energy"]')).toBeVisible();
+  await page.keyboard.press('End');
+  await expect(page.locator('[data-home-panel="wiring"]')).toBeVisible();
+  await page.keyboard.press('Home');
   await page.locator('.node-cad').focus();
   await page.keyboard.press('Enter');
   await expect(page).toHaveURL(/projects\/dwg-agent\/$/);
-  await expect(page.getByRole('button', { name: '校验并继续', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: '展平', exact: true })).toBeVisible();
 });
 
-test('drag rotation responds without swallowing vertical touch scrolling', async ({ page }) => {
-  await page.goto(url());
-  const canvas = page.locator('[data-stage-canvas]');
-  const box = (await canvas.boundingBox())!;
-  await page.mouse.move(box.x + box.width * .4, box.y + box.height * .5);
-  await page.mouse.down();
-  await page.mouse.move(box.x + box.width * .7, box.y + box.height * .6, { steps: 5 });
-  await page.mouse.up();
-  await expect(page.locator('[data-motion-stage]')).toHaveAttribute('data-interacted', 'true');
-  await expect(canvas).toHaveCSS('touch-action', 'pan-y');
-});
-
-test('reduced motion updates scenes instantly and stops continuous canvas frames', async ({ page }) => {
+test('reduced motion reaches final geometry immediately and performs no continuing animation', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto(url());
-  const stage = page.locator('[data-motion-stage]');
-  await expect(stage).toHaveAttribute('data-playing', 'false');
-  await page.getByRole('button', { name: '预测曲面', exact: true }).click();
-  await expect(stage).toHaveAttribute('data-scene', 'energy');
-  await expect(stage).toHaveAttribute('data-playing', 'false');
-  await expect(page.locator('h1')).toHaveText('Ranxin');
+  const cad = page.locator('[data-experience="plate-split"]');
+  await cad.getByRole('button', { name: '展平', exact: true }).click();
+  await expect(cad.locator('[data-split-scene-step]')).toHaveText('03 / 展平');
+  const before = await cad.locator('.plate-front').evaluateAll(nodes => nodes.map(el => el.getAttribute('points')));
+  await page.waitForTimeout(150);
+  expect(await cad.locator('.plate-front').evaluateAll(nodes => nodes.map(el => el.getAttribute('points')))).toEqual(before);
+  expect(await cad.evaluate(el => el.getAnimations({ subtree: true }).length)).toBe(0);
 });
 
-test('canvas failure preserves the SVG fallback, project links and readable identity', async ({ page }) => {
-  await page.addInitScript(() => { HTMLCanvasElement.prototype.getContext = (() => null) as typeof HTMLCanvasElement.prototype.getContext; });
+test('inactive project panels and offscreen workbenches pause their animations', async ({ page }) => {
   await page.goto(url());
-  await expect(page.locator('[data-stage-fallback]')).toBeVisible();
-  await expect(page.locator('[data-stage-canvas]')).not.toBeVisible();
-  await expect(page.locator('.stage-drag-hint')).toContainText('静态');
-  await expect(page.locator('h1')).toHaveText('Ranxin');
-  await page.locator('.node-cad').click();
-  await expect(page).toHaveURL(/projects\/dwg-agent\/$/);
-});
-
-test('stage pauses outside the viewport and mobile layout keeps real project controls', async ({ page }) => {
-  await page.goto(url());
+  const cad = page.locator('[data-experience="plate-split"]');
+  await expect(cad).toHaveAttribute('data-paused', 'false');
+  await cad.getByRole('button', { name: '拆开', exact: true }).click();
+  await page.getByRole('tab', { name: '跨页追线' }).click();
+  await expect(cad).toHaveAttribute('data-paused', 'true');
+  await page.locator('[data-trace-start]').click();
   await page.locator('#contact').scrollIntoViewIfNeeded();
-  await expect(page.locator('[data-motion-stage]')).toHaveAttribute('data-playing', 'false');
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto(url());
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBeTruthy();
-  await page.getByRole('button', { name: '连接网络', exact: true }).click();
-  await expect(page.locator('[data-motion-stage]')).toHaveAttribute('data-scene', 'wiring');
+  await expect(page.locator('[data-experience="wiring-query"]')).toHaveAttribute('data-paused', 'true');
 });
 
-test('canvas context loss cannot restart a hidden animation when preferences change', async ({ page }) => {
-  await page.goto(url());
-  const stage = page.locator('[data-motion-stage]');
-  await expect(stage).toHaveAttribute('data-render', 'canvas');
-  await page.getByRole('button', { name: '预测曲面', exact: true }).click();
-  await page.locator('[data-stage-canvas]').dispatchEvent('contextlost');
-  await page.locator('[data-theme-toggle]').click();
-  await expect(stage).toHaveAttribute('data-render', 'fallback');
-  await expect(stage).toHaveAttribute('data-scene', 'cad');
-  await expect(stage).toHaveAttribute('data-playing', 'false');
-  await expect(page.locator('[data-stage-canvas]')).not.toBeVisible();
-  await expect(page.locator('.stage-drag-hint')).toContainText('静态');
+test('without scripts all three home workbenches show meaningful static drawings', async ({ browser }) => {
+  const context = await browser.newContext({ javaScriptEnabled: false });
+  const page = await context.newPage();
+  await page.goto(new URL(url(), process.env.TEST_URL || 'http://127.0.0.1:4321').toString());
+  await expect(page.locator('[data-home-panel]')).toHaveCount(3);
+  for (const key of ['cad', 'energy', 'wiring']) await expect(page.locator(`[data-home-panel="${key}"] svg`).first()).toBeVisible();
+  await expect(page.locator('[data-motion-ribbon]')).not.toBeVisible();
+  await expect(page.locator('[data-demo-controls]:visible')).toHaveCount(0);
+  await context.close();
 });
 
-test('system color changes redraw the canvas with the matching dark palette', async ({ page }) => {
+test('system color changes update diagram colors and keep dark artwork backgrounds subdued', async ({ page }) => {
   await page.emulateMedia({ colorScheme: 'light' });
   await page.goto(url());
-  await expect(page.locator('[data-motion-stage]')).toHaveAttribute('data-render', 'canvas');
+  const initial = await page.locator('.plate-top .plate-front').first().evaluate(el => getComputedStyle(el).stroke);
   await page.emulateMedia({ colorScheme: 'dark' });
-  await expect.poll(() => page.locator('[data-stage-canvas]').evaluate(canvas => (canvas as HTMLCanvasElement).getContext('2d')?.strokeStyle)).toMatch(/140,\s*174,\s*255/);
+  const dark = await page.locator('.plate-top .plate-front').first().evaluate(el => getComputedStyle(el).stroke);
+  expect(dark).not.toBe(initial);
+  await expect(page.locator('.art-energy')).toHaveCSS('--art-accent', '#72cec1');
+  await expect(page.locator('.motion-cursor')).toHaveCount(0);
 });
 
-test('reading progress resynchronizes after a suspended page resumes', async ({ page }) => {
+test('mobile touch controls, project spacing and resumed reading progress remain usable', async ({ browser, page }) => {
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+  const mobile = await context.newPage();
+  await mobile.goto(new URL(url(), process.env.TEST_URL || 'http://127.0.0.1:4321').toString());
+  await mobile.getByRole('button', { name: '拆开', exact: true }).tap();
+  await expect(mobile.locator('[data-split-phase]')).toHaveValue('50');
+  await mobile.getByRole('tab', { name: '气象与出力' }).tap();
+  await mobile.getByLabel('时间点', { exact: true }).fill('3');
+  await expect(mobile.locator('[data-time-caption]')).toHaveText('T+3 h');
+  await mobile.getByRole('tab', { name: '跨页追线' }).tap();
+  await mobile.locator('[data-trace-source]').selectOption('p1');
+  await mobile.locator('[data-trace-start]').tap();
+  await expect(mobile.locator('[data-trace-summary]')).toContainText('B:1');
+  await expect(mobile.locator('.wire-port.connected .port-hit').first()).toHaveCSS('stroke', 'none');
+  expect(await mobile.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await context.close();
   await page.goto(url());
-  await page.evaluate(() => {
-    window.dispatchEvent(new Event('scroll'));
-    window.dispatchEvent(new PageTransitionEvent('pagehide', { persisted: true }));
-    window.dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true }));
-    window.scrollTo(0, 1000);
-  });
-  await expect.poll(() => page.locator('.reading-progress').evaluate(element => new DOMMatrix(getComputedStyle(element).transform).a)).toBeGreaterThan(0);
+  const distance = await page.evaluate(() => document.querySelector('.project-row .project-visual-link')!.getBoundingClientRect().top - document.querySelector('[data-motion-ribbon]')!.getBoundingClientRect().bottom);
+  expect(distance).toBeLessThanOrEqual(300);
+  await page.evaluate(() => { dispatchEvent(new PageTransitionEvent('pagehide')); scrollTo(0, 500); dispatchEvent(new PageTransitionEvent('pageshow')); });
+  await expect.poll(() => page.locator('.reading-progress').evaluate(el => getComputedStyle(el).transform)).not.toBe('matrix(0, 0, 0, 1, 0, 0)');
 });

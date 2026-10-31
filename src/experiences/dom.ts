@@ -20,5 +20,5 @@ export function svgNode<K extends keyof SVGElementTagNameMap>(tag: K, attributes
 
 export function enhance(root: HTMLElement) {
   root.dataset.enhanced = 'true';
-  root.querySelectorAll<HTMLElement>('[data-demo-controls], [data-demo-reset], [data-inventory-filters]').forEach(item => item.hidden = false);
+  root.querySelectorAll<HTMLElement>('[data-demo-controls], [data-demo-reset], [data-inventory-filters], [data-demo-action]').forEach(item => item.hidden = false);
 }

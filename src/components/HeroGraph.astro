@@ -1,28 +1,26 @@
 ---
+import SplitExperience from '../experiences/splitting/Experience.astro';
+import EnergyExperience from '../experiences/energy/Experience.astro';
+import WiringExperience from '../experiences/wiring/Experience.astro';
 import { withBase } from '../lib/model.mjs';
+import '../styles/experiences.css';
+import '../styles/workbenches.css';
 const link = (path: string) => withBase(import.meta.env.BASE_URL, path);
+const panels = [
+  { key: 'cad', label: '拆板工作台', slug: 'dwg-agent' },
+  { key: 'energy', label: '气象与出力', slug: 'renewable-forecasting' },
+  { key: 'wiring', label: '跨页追线', slug: 'electrical-drawings' },
+];
 ---
-<div class="hero-graph motion-stage" data-hero-graph data-motion-stage data-scene="cad" data-render="fallback" data-playing="false">
-  <div class="stage-topline"><span class="stage-label"><i></i> INTERACTIVE FIELD</span><span class="stage-index" data-scene-index>01 / 03</span></div>
-  <div class="stage-visual">
-    <div class="stage-halo" aria-hidden="true"></div>
-    <svg data-stage-fallback class="stage-fallback" viewBox="0 0 570 460" fill="none" aria-hidden="true">
-      <defs><pattern id="hero-grid" width="30" height="30" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="1" fill="currentColor" opacity=".14"/></pattern></defs>
-      <rect width="570" height="460" fill="url(#hero-grid)"/>
-      <path d="M70 230H500M285 35V425" class="graph-axis"/>
-      <path d="M155 125H400V200H325V340H155Z" class="graph-path stage-outline"/>
-      <path d="M173 105H418V180H343V320H173ZM155 125L173 105M400 125L418 105M400 200L418 180M325 200L343 180M325 340L343 320M155 340L173 320" class="stage-outline stage-outline-back"/>
-      <circle cx="285" cy="230" r="180" class="graph-orbit"/>
-      <text x="52" y="390" class="math-note">geometry → data → connection</text>
-    </svg>
-    <canvas data-stage-canvas hidden width="680" height="530" tabindex="0" role="img" aria-label="立体项目概念图。可拖动旋转，或用方向键旋转、Home 复位；下方按钮切换图纸、预测和连接主题。"></canvas>
-    <span class="stage-coordinate stage-coordinate-top" aria-hidden="true">x / y / z</span>
-    <span class="stage-coordinate stage-coordinate-bottom" aria-hidden="true" data-stage-angle>θ 024°</span>
-    <div class="stage-caption"><span class="stage-caption-label">THINK IN STRUCTURES</span><strong data-scene-caption>图纸结构 / 预处理与集成</strong></div>
-  </div>
-  <div class="stage-controls" data-stage-controls hidden role="group" aria-label="立体示意图主题">
-    <button type="button" data-scene-button="cad" aria-pressed="true">图纸结构</button><button type="button" data-scene-button="energy" aria-pressed="false">预测曲面</button><button type="button" data-scene-button="wiring" aria-pressed="false">连接网络</button>
-  </div>
-  <div class="stage-footer"><span class="stage-drag-hint">静态概念示意 · 项目入口</span><div class="stage-project-links"><a class="node-cad" href={link('projects/dwg-agent/')} aria-label="进入图纸项目" title="图纸预处理与软件集成">01 ↗</a><a class="node-data" href={link('projects/renewable-forecasting/')} aria-label="进入预测项目" title="新能源出力预测">02 ↗</a><a class="node-wiring" href={link('projects/electrical-drawings/')} aria-label="进入接线项目" title="电气图纸解析与离线查询">03 ↗</a></div></div>
-</div>
-<script>import '../motion/stage';</script>
+<section class="home-workbench" data-home-workbench aria-label="动手了解三个项目">
+  <div class="workbench-heading"><span class="mono"><i></i> PROJECT LAB</span><span>从核心操作开始</span></div>
+  <div class="workbench-tabs" data-home-tabs role="tablist" aria-label="选择项目体验" hidden>{panels.map((panel, i) => <button type="button" id={`home-tab-${panel.key}`} data-home-tab={panel.key} role="tab" aria-controls={`home-panel-${panel.key}`} aria-selected={i === 0} tabindex={i === 0 ? 0 : -1}>{panel.label}</button>)}</div>
+  {panels.map(panel => <div id={`home-panel-${panel.key}`} data-home-panel={panel.key} role="tabpanel" aria-labelledby={`home-tab-${panel.key}`}>
+    <noscript><h2 class="static-workbench-title">{panel.label}</h2></noscript>
+    {panel.key === 'cad' && <SplitExperience compact />}
+    {panel.key === 'energy' && <EnergyExperience compact />}
+    {panel.key === 'wiring' && <WiringExperience compact />}
+    <div class="workbench-footer"><span>独立重建样例 · 浏览器内计算</span><a class:list={['workbench-more', { 'node-cad': panel.key === 'cad', 'node-data': panel.key === 'energy', 'node-wiring': panel.key === 'wiring' }]} href={link(`projects/${panel.slug}/`)}>进入完整体验 <span aria-hidden="true">↗</span></a></div>
+  </div>)}
+</section>
+<script>import '../experiences/load';</script>

@@ -20,37 +20,40 @@ test('nickname is the first impression and profile disclosure restores focus', a
 
 test('CAD fixes missing fields, blocks duplicates, advances handoff and manages inventory', async ({ page }) => {
   await page.goto(url('projects/dwg-agent/'));
-  await page.getByLabel('图纸场景').selectOption('missing');
-  await page.getByRole('button', { name: '校验并继续', exact: true }).click();
-  await expect(page.locator('[data-cad-status]')).toContainText('2 项');
-  await page.getByRole('button', { name: '补入示例字段' }).click();
-  await page.getByRole('button', { name: '校验并继续', exact: true }).click();
-  await expect(page.locator('[data-cad-status]')).toContainText('字段校验通过');
-  await page.getByRole('button', { name: '转换数据', exact: true }).click();
-  await expect(page.locator('[data-handoff]')).toContainText('thicknessMm');
-  await page.getByRole('button', { name: '确认交接', exact: true }).click();
-  await page.getByRole('button', { name: '登记入库', exact: true }).click();
-  await expect(page.locator('[data-cad-status]')).toContainText('3 条');
-  await expect(page.locator('[data-cad-form] button[type="submit"]')).toBeDisabled();
-  await expect(page.locator('[data-cad-form] button[type="submit"]')).toHaveAccessibleName('字段已锁定，重置后可编辑');
-  await expect(page.getByLabel('对象材料')).toBeDisabled();
-  const first = page.locator('[data-stock-id="stock-a"]');
+  await page.locator('.secondary-experience > summary').click();
+  const legacy = page.locator('[data-experience="cad-flow"]');
+  await expect(legacy).toHaveAttribute('data-enhanced', 'true');
+  await legacy.getByLabel('图纸场景').selectOption('missing');
+  await legacy.getByRole('button', { name: '校验并继续', exact: true }).click();
+  await expect(legacy.locator('[data-cad-status]')).toContainText('2 项');
+  await legacy.getByRole('button', { name: '补入示例字段' }).click();
+  await legacy.getByRole('button', { name: '校验并继续', exact: true }).click();
+  await expect(legacy.locator('[data-cad-status]')).toContainText('字段校验通过');
+  await legacy.getByRole('button', { name: '转换数据', exact: true }).click();
+  await expect(legacy.locator('[data-handoff]')).toContainText('thicknessMm');
+  await legacy.getByRole('button', { name: '确认交接', exact: true }).click();
+  await legacy.getByRole('button', { name: '登记入库', exact: true }).click();
+  await expect(legacy.locator('[data-cad-status]')).toContainText('3 条');
+  await expect(legacy.locator('[data-cad-form] button[type="submit"]')).toBeDisabled();
+  await expect(legacy.locator('[data-cad-form] button[type="submit"]')).toHaveAccessibleName('字段已锁定，重置后可编辑');
+  await expect(legacy.getByLabel('对象材料')).toBeDisabled();
+  const first = legacy.locator('[data-stock-id="stock-a"]');
   await first.getByRole('button', { name: '预留' }).click();
   await expect(first).toContainText('已预留');
   await first.getByRole('button', { name: '释放' }).click();
   await first.getByRole('button', { name: '预留' }).click();
   await first.getByRole('button', { name: '领用' }).click();
   await expect(first).toContainText('已使用');
-  await page.getByLabel('材料筛选').selectOption('Q355B');
-  await page.getByLabel('厚度筛选').selectOption('12');
-  await expect(page.locator('[data-stock-id]')).toHaveCount(2);
-  await page.getByRole('button', { name: '重置体验' }).click();
-  await page.getByLabel('图纸场景').selectOption('duplicate');
-  await page.getByRole('button', { name: '校验并继续', exact: true }).click();
-  await expect(page.locator('[data-cad-status]')).toContainText('重复');
-  await page.getByRole('button', { name: '移除重复记录' }).click();
-  await page.getByRole('button', { name: '校验并继续', exact: true }).click();
-  await expect(page.locator('[data-cad-status]')).toContainText('字段校验通过');
+  await legacy.getByLabel('材料筛选').selectOption('Q355B');
+  await legacy.getByLabel('厚度筛选').selectOption('12');
+  await expect(legacy.locator('[data-stock-id]')).toHaveCount(2);
+  await legacy.getByRole('button', { name: '重置体验' }).click();
+  await legacy.getByLabel('图纸场景').selectOption('duplicate');
+  await legacy.getByRole('button', { name: '校验并继续', exact: true }).click();
+  await expect(legacy.locator('[data-cad-status]')).toContainText('重复');
+  await legacy.getByRole('button', { name: '移除重复记录' }).click();
+  await legacy.getByRole('button', { name: '校验并继续', exact: true }).click();
+  await expect(legacy.locator('[data-cad-status]')).toContainText('字段校验通过');
 });
 
 test('forecast controls change real metrics and time selection is keyboard accessible', async ({ page }) => {
@@ -102,11 +105,11 @@ test('project tabs support arrow keys and each mobile experience fits the viewpo
     await page.keyboard.press('ArrowRight');
     await expect(page.getByRole('heading', { name: '成果与收获', exact: true })).toBeVisible();
     await page.keyboard.press('Home');
-    await expect(page.locator('[data-experience]')).toBeVisible();
+    await expect(page.locator('[data-case-panel="experience"] > [data-experience]')).toBeVisible();
     for (const width of [360, 390, 768]) {
       await page.setViewportSize({ width, height: 900 });
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBeTruthy();
-      await expect(page.locator('[data-demo-reset]')).toBeVisible();
+      await expect(page.locator('[data-case-panel="experience"] > [data-experience] [data-demo-reset]')).toBeVisible();
     }
   }
 });
@@ -116,8 +119,9 @@ test('every experience has useful static output without JavaScript', async ({ br
   const page = await context.newPage();
   for (const slug of ['dwg-agent', 'renewable-forecasting', 'electrical-drawings']) {
     await page.goto(new URL(url(`projects/${slug}/`), process.env.TEST_URL || 'http://127.0.0.1:4321').toString());
-    await expect(page.locator('[data-experience] svg')).toBeVisible();
-    await expect(page.locator('[data-demo-controls]')).not.toBeVisible();
+    await expect(page.locator('[data-case-panel="experience"] > [data-experience] .demo-visual > svg').first()).toBeVisible();
+    await expect(page.locator('[data-demo-controls]:visible')).toHaveCount(0);
+    await expect(page.locator('[data-demo-action]:visible')).toHaveCount(0);
     await expect(page.getByRole('heading', { name: '我负责的部分' })).toBeVisible();
     await expect(page.getByRole('heading', { name: '团队的阶段产出' })).toBeVisible();
     await expect(page.getByText(/当前显示静态样例与结果/)).toBeVisible();
@@ -136,7 +140,7 @@ test('interactive routes work with all other origins blocked and reset on refres
   await expect(page.getByLabel('生成场景')).toHaveValue('ramp');
   await expect(page.getByLabel('预测方案')).toHaveValue('sample');
   await page.goto(url('projects/dwg-agent/'));
-  await expect(page.getByRole('button', { name: '校验并继续', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: '展平', exact: true })).toBeVisible();
   await page.goto(url('projects/electrical-drawings/'));
   await page.getByRole('button', { name: '已确认网络', exact: true }).click();
   await expect(page.locator('[data-wiring-results]')).toContainText('B:1');
@@ -161,6 +165,8 @@ test('dark project accents print in readable ink on white paper', async ({ page 
   await page.goto(url('projects/renewable-forecasting/'));
   await page.emulateMedia({ media: 'print' });
   await expect(page.locator('[data-metric="mae"]')).toHaveCSS('color', 'rgb(35, 128, 120)');
+  await expect(page.locator('.project-reflection')).toHaveCSS('background-color', 'rgb(234, 241, 255)');
+  await expect(page.locator('.project-reflection p')).toHaveCSS('color', 'rgb(25, 44, 73)');
   await page.goto(url('projects/electrical-drawings/'));
   await expect(page.locator('.connection-results .state-chip').first()).toHaveCSS('color', 'rgb(81, 76, 145)');
 });
