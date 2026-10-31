@@ -1,6 +1,6 @@
 /* The new identity and reading rhythm extend the existing site theme. */
 .hero { grid-template-columns: 1.05fr 1fr; gap: 20px; padding-top: 70px; }
-.nickname-lockup { position: relative; width: fit-content; margin: 22px 0 30px; }
+.nickname-lockup { position: relative; width: fit-content; margin: 22px 0 30px; cursor: default; -webkit-user-select: none; user-select: none; caret-color: transparent; }
 .hero .nickname-lockup h1 { font-size: clamp(92px, 10vw, 153px); line-height: .98; letter-spacing: -.075em; font-weight: 650; margin: 0; }
 .nickname-zh { display: block; color: var(--blue); text-align: right; font-size: 23px; letter-spacing: .26em; margin-top: 14px; padding-right: 5px; }
 .hero .hero-statement { font-size: clamp(24px, 2.4vw, 34px); line-height: 1.5; }
