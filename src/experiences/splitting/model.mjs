@@ -20,7 +20,7 @@ export function splitPlates(sample, allowance = 0) {
       { id: 'right', label: '右腹板', role: 'web', width: sample.height - 2 * sample.flangeThickness, thickness: sample.webThickness },
     ]),
   ];
-  const plates = definitions.map(plate => ({ ...plate, length: sample.length + allowance, normalLength: sample.length, holes: [80, sample.length - 80].flatMap(x => [.32, .68].map(fraction => ({ x, y: plate.width * fraction, r: 9 }))) }));
+  const plates = definitions.map(plate => ({ ...plate, length: sample.length + 2 * allowance, normalLength: sample.length, allowancePerEnd: allowance, holes: [80, sample.length - 80].flatMap(x => [.32, .68].map(fraction => ({ x, y: plate.width * fraction, r: 9 }))) }));
   return { status: 'accepted', issues: [], plates };
 }
 
