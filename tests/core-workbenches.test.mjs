@@ -18,19 +18,24 @@ test('BH and BOX split into distinct physical plates, including equal-sized side
   }
 });
 
-test('allowance changes the contour length while holes and physical identity remain fixed', () => {
+test('each lengthwise end receives the configured allowance while holes and identity stay fixed', () => {
   assert.ok(split, 'A public plate-splitting model is required');
   for (const kind of ['bh', 'box']) {
     const sample = split.createSplitSample(kind);
     const ordinary = split.splitPlates(sample, 0).plates;
-    const extended = split.splitPlates(sample, 10).plates;
-    assert.equal(ordinary.length, extended.length);
-    ordinary.forEach((plate, i) => {
-      assert.equal(extended[i].length, plate.length + 10);
-      assert.equal(extended[i].id, plate.id);
-      assert.deepEqual(extended[i].holes, plate.holes);
-      assert.ok(extended[i].holes.every(h => h.x - h.r > 0 && h.x + h.r < extended[i].length && h.y - h.r > 0 && h.y + h.r < plate.width));
-    });
+    for (const allowance of [5, 10, 20, 0]) {
+      const extended = split.splitPlates(sample, allowance).plates;
+      assert.equal(ordinary.length, extended.length);
+      ordinary.forEach((plate, i) => {
+        assert.equal(extended[i].length, plate.length + 2 * allowance);
+        assert.equal(extended[i].allowancePerEnd, allowance);
+        assert.equal(extended[i].normalLength, plate.normalLength);
+        assert.equal(extended[i].width, plate.width);
+        assert.equal(extended[i].id, plate.id);
+        assert.deepEqual(extended[i].holes, plate.holes);
+        assert.ok(extended[i].holes.every(h => h.x - h.r > -allowance && h.x + h.r < plate.normalLength + allowance && h.y - h.r > 0 && h.y + h.r < plate.width));
+      });
+    }
   }
 });
 

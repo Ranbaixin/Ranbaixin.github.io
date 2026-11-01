@@ -51,12 +51,13 @@ export function mount(root: HTMLElement) {
       get(root, '[data-compare-geometry]').replaceChildren(); renderGeometry(); return;
     }
     get(root, '[data-split-selection]').textContent = `${plate.label} · ${plate.normalLength} × ${plate.width} × ${plate.thickness} mm`;
-    get(root, '[data-split-dimensions]').textContent = `普通长度 ${plate.normalLength} mm → 余量长度 ${plate.length} mm · 板宽 ${plate.width} mm`;
-    const scale = 560 / (sample.length! + 20);
+    get(root, '[data-split-dimensions]').textContent = `普通长度 ${plate.normalLength} mm → 余量长度 ${plate.length} mm · 两端各 ${plate.allowancePerEnd} mm · 板宽 ${plate.width} mm`;
+    const maxAllowance = Number(allowance.max);
+    const scale = 560 / (plate.normalLength + 2 * maxAllowance), originX = 80 + maxAllowance * scale;
     get(root, '[data-compare-geometry]').replaceChildren(
-      svgNode('rect', { x: 80, y: 50, width: plate.length * scale, height: plate.width * scale, class: 'compare-allowance' }),
-      svgNode('rect', { x: 80, y: 50, width: plate.normalLength * scale, height: plate.width * scale, class: 'compare-normal' }),
-      ...plate.holes.map(hole => svgNode('circle', { 'data-compare-hole': '', cx: 80 + hole.x * scale, cy: 50 + hole.y * scale, r: hole.r * scale })),
+      svgNode('rect', { x: originX - plate.allowancePerEnd * scale, y: 50, width: plate.length * scale, height: plate.width * scale, class: 'compare-allowance' }),
+      svgNode('rect', { x: originX, y: 50, width: plate.normalLength * scale, height: plate.width * scale, class: 'compare-normal' }),
+      ...plate.holes.map(hole => svgNode('circle', { 'data-compare-hole': '', cx: originX + hole.x * scale, cy: 50 + hole.y * scale, r: hole.r * scale })),
     );
     renderGeometry();
   }
