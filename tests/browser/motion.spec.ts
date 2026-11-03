@@ -75,7 +75,7 @@ test('mobile touch controls, project spacing and resumed reading progress remain
   await mobile.getByRole('tab', { name: '跨页追线' }).tap();
   await mobile.locator('[data-trace-source]').selectOption('p1');
   await mobile.locator('[data-trace-start]').tap();
-  await expect(mobile.locator('[data-trace-summary]')).toContainText('B:1');
+  await expect(mobile.locator('[data-trace-summary]')).toContainText('XT01:21');
   await expect(mobile.locator('.wire-port.connected .port-hit').first()).toHaveCSS('stroke', 'none');
   expect(await mobile.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await context.close();

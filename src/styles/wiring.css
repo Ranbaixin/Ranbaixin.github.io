@@ -1,0 +1,61 @@
+.wire-sheet { --drawing-ink: var(--text); color: var(--drawing-ink); width: 100%; height: auto; }
+.engineering-paper { fill: var(--paper); stroke: var(--muted); stroke-width: 1.3; }
+.engineering-frame, .engineering-symbol, .engineering-reference { fill: none; stroke: var(--drawing-ink); stroke-width: 1.3; }
+.engineering-table { fill: none; stroke: var(--drawing-ink); stroke-width: 1.4; }
+.engineering-title { fill: var(--text); font: 600 22px var(--sans); }
+.engineering-caption { fill: var(--text); font: 15px var(--mono); }
+.engineering-small { fill: var(--text); font: 12px var(--mono); }
+.engineering-muted { fill: var(--muted); font: 12px var(--sans); }
+.engineering-grid-label { fill: var(--muted); font: 11px var(--mono); }
+.engineering-mechanical { fill: none; stroke: var(--muted); stroke-width: 1.1; stroke-dasharray: 5 5; }
+.wire-sheet .wire-edge path { fill: none; stroke: var(--drawing-ink); opacity: .65; stroke-width: 1.7; }
+.wire-sheet .wire-edge.pending path { stroke: var(--muted); stroke-dasharray: 7 5; opacity: .65; }
+.wire-sheet .wire-edge.network path { stroke: var(--muted); stroke-dasharray: 9 4 2 4; }
+.wire-sheet .wire-edge.active path { stroke: var(--accent, var(--wiring-accent)); stroke-width: 3; opacity: 1; }
+.wire-sheet .wire-edge.evidence-active path { stroke: var(--blue); stroke-width: 4; opacity: 1; }
+.wire-sheet .wire-edge.traced path { stroke: var(--accent, var(--wiring-accent)); stroke-width: 4; opacity: 1; stroke-dasharray: 1000; animation: trace-draw .65s ease-out both; animation-delay: calc(var(--trace-order, 0) * 180ms); }
+.wire-sheet .wire-port text { font: 14px var(--mono); fill: var(--drawing-ink); }
+.wire-sheet .terminal-face { fill: var(--paper); stroke: var(--drawing-ink); stroke-width: 1.3; }
+.wire-sheet .wire-port.connected .terminal-face { stroke: var(--accent, var(--wiring-accent)); }
+.wire-sheet .wire-port.selected .terminal-face { fill: var(--soft); stroke: var(--blue); stroke-width: 2.5; }
+.wire-sheet .wire-port:focus-visible .terminal-face { stroke: var(--blue); stroke-width: 3; stroke-dasharray: 4 3; }
+.wire-sheet .wire-port .port-hit, .wire-sheet .wire-port.connected .port-hit { fill: transparent; stroke: none; }
+.wire-sheet text, .wire-sheet .engineering-symbol { pointer-events: none; }
+.drawing-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 17px 22px 8px; }
+.drawing-pages, .drawing-zoom { display: flex; gap: 6px; }
+.drawing-toolbar button { border: 1px solid var(--line); border-radius: 5px; background: var(--paper); color: var(--muted); padding: 6px 9px; font-size: 11px; min-height: 35px; }
+.drawing-pages button[aria-pressed=true] { border-color: var(--accent); background: var(--soft); color: var(--text); }
+.drawing-zoom button { min-width: 35px; }
+.drawing-page-status { color: var(--muted); font-size: 11px; padding: 5px 25px; }
+.drawing-viewport { overflow: hidden; margin: 8px 12px 12px; border: 1px solid var(--line); border-radius: 7px; background: var(--paper); }
+.drawing-viewport .wiring-canvas { aspect-ratio: 1000/640; width: 100%; touch-action: pan-y; }
+.drawing-viewport[data-zoomed=true] .wiring-canvas { cursor: grab; touch-action: none; }
+.drawing-viewport[data-panning=true] .wiring-canvas { cursor: grabbing; }
+.drawing-viewport .wire-port { cursor: pointer; }
+.drawing-instruction { padding: 0 25px 12px; font-size: 10px; color: var(--muted); }
+.evidence-navigation { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.evidence-navigation button[aria-pressed=true] { border-color: var(--accent); background: var(--soft); }
+.evidence-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 22px; margin-top: 15px; font-size: 12px; }
+.evidence-facts dt { color: var(--muted); font-size: 10px; }
+.evidence-facts dd { margin-top: 4px; overflow-wrap: anywhere; }
+.experience-wiring .connection-row { grid-template-columns: 180px 100px 1fr auto; }
+.experience-wiring .port-search-result strong { font-size: 11px; }
+.experience-wiring .port-search-hint { font-size: 10px; color: var(--muted); margin-top: -10px; }
+[data-variant=compact] .drawing-toolbar { padding: 12px 18px 5px; }
+[data-variant=compact] .drawing-toolbar button { font-size: 10px; padding: 5px 7px; min-height: 32px; }
+[data-variant=compact] .drawing-page-status { padding-inline: 20px; font-size: 10px; }
+[data-variant=compact] .drawing-instruction { padding-inline: 20px; font-size: 9px; }
+[data-variant=compact] .drawing-viewport .wiring-canvas { max-height: none; }
+.project-art .wire-sheet { width: 540px; height: 346px; }
+@media(max-width:800px) { .experience-wiring .connection-row { grid-template-columns: minmax(0,1fr) auto; } .experience-wiring .connection-row .connection-note { grid-column: 1; } }
+@media(max-width:590px) {
+  .drawing-toolbar { padding: 14px 15px 6px; gap: 5px; flex-wrap: wrap; }
+  .drawing-toolbar button { min-height: 39px; }
+  .drawing-page-status, .drawing-instruction { padding-inline: 16px; }
+  .experience-wiring .connection-row { grid-template-columns: 1fr auto; }
+  .evidence-facts { gap: 13px; }
+}
+@media(prefers-reduced-motion:reduce) { .wire-sheet .wire-edge.traced path { animation: none; } }
+:root[data-motion=reduce] .wire-sheet .wire-edge.traced path, [data-paused=true] .wire-sheet .wire-edge.traced path { animation: none; }
+@media print { .drawing-toolbar, .drawing-instruction, .drawing-page-status { display: none !important; } .drawing-viewport { overflow: visible; } .wire-sheet { break-inside: avoid; } }
+@layer reset { @media print { .wire-sheet[data-drawing-page][hidden] { display: block !important; } } }

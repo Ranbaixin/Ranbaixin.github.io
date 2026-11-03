@@ -1,8 +1,10 @@
 import { readFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { validateContent } from '../src/lib/model.mjs';
+import { wiringSample, validateWiringSample } from '../src/experiences/wiring/model.mjs';
 const bytes = await readFile(new URL('../src/data/content.json', import.meta.url));
 const errors = validateContent(JSON.parse(bytes));
+errors.push(...validateWiringSample(wiringSample));
 const digest = createHash('sha256').update(bytes).digest('hex');
 try {
   const pdf = await readFile(new URL('../public/resume.pdf', import.meta.url));

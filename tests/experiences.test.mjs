@@ -84,7 +84,7 @@ test('forecast windows share a fixed origin and never use future values for pers
 test('confirmed network includes cross-page links and excludes pending, conflict and device interiors', () => {
   assert.equal(typeof wiring.queryConnections, 'function');
   const result = wiring.queryConnections(wiring.wiringSample, 'p1', 'network');
-  assert.deepEqual(result.portIds.sort(), ['p1', 'p2', 'p3', 'p4']);
+  assert.deepEqual(result.portIds.sort(), ['p1', 'p4']);
   assert.ok(result.edges.every(e => e.status === 'verified' && e.kind !== 'component'));
   assert.equal(wiring.queryConnections(wiring.wiringSample, 'p1', 'direct').portIds.length, 2);
 });
@@ -93,15 +93,18 @@ test('pending connections stay separately queryable with their sample evidence',
   assert.equal(typeof wiring.queryConnections, 'function');
   const result = wiring.queryConnections(wiring.wiringSample, 'p3', 'pending');
   assert.equal(result.edges[0].status, 'pending');
-  assert.ok(result.edges.every(e => e.evidence.startsWith('样例')));
-  const conflict = wiring.queryConnections(wiring.wiringSample, 'p2', 'pending');
-  assert.equal(conflict.edges[0].status, 'conflict');
+  assert.ok(result.edges.every(e => e.views.length > 0 && e.views.every(v => v.page && v.zone)));
+  const fixture = structuredClone(wiring.wiringSample);
+  fixture.edges.push({ ...fixture.edges[0], id: 'test-conflict', a: 'p2', b: 'p3', status: 'conflict' });
+  const conflict = wiring.queryConnections(fixture, 'p2', 'pending');
+  assert.ok(conflict.edges.some(e => e.status === 'conflict'));
+  assert.ok(!wiring.queryConnections(fixture, 'p2', 'network').edges.some(e => e.status === 'conflict'));
   assert.throws(() => wiring.queryConnections(wiring.wiringSample, 'unknown', 'direct'), /port/);
 });
 
 test('port search is case-insensitive and treats wildcard characters literally', () => {
   assert.equal(typeof wiring.searchPorts, 'function');
-  assert.equal(wiring.searchPorts(wiring.wiringSample, 'a:1')[0].id, 'p1');
+  assert.equal(wiring.searchPorts(wiring.wiringSample, 'q01:2')[0].id, 'p1');
   assert.equal(wiring.searchPorts(wiring.wiringSample, '%').length, 0);
   assert.equal(wiring.searchPorts(wiring.wiringSample, '').length, wiring.wiringSample.ports.length);
 });

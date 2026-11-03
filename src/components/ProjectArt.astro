@@ -1,7 +1,8 @@
 ---
 import { createSplitSample, splitPlates, projectSplit } from '../experiences/splitting/model.mjs';
 import { buildWeatherForecast } from '../experiences/energy/model.mjs';
-import { wiringSample } from '../experiences/wiring/model.mjs';
+import Sheet from '../experiences/wiring/Sheet.astro';
+import '../styles/wiring.css';
 interface Props { theme: string; }
 const { theme } = Astro.props;
 const sample = createSplitSample('bh');
@@ -10,7 +11,6 @@ const geometry = projectSplit(sample, .36);
 const forecast = buildWeatherForecast();
 const graphPath = (key: 'actual' | 'predicted') => forecast.points.map((p, i) => `${i ? 'L' : 'M'}${280 + i / 23 * 380},${305 - p[key] * 195}`).join(' ');
 const pts = (points: number[][]) => points.map(p => p.join(',')).join(' ');
-const port = (id: string) => wiringSample.ports.find(p => p.id === id)!;
 ---
 <div class:list={['project-art', `art-${theme}`]} aria-hidden="true">
   <svg viewBox="0 0 720 420" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -32,16 +32,10 @@ const port = (id: string) => wiringSample.ports.find(p => p.id === id)!;
       <text x="280" y="337">T+1 → T+24 h</text><text x="487" y="337">MAE {forecast.metrics.mae.toFixed(3)}</text>
       <text x="280" y="365">INPUT → FORECAST → EVALUATE</text>
     </> : <>
-      <text x="35" y="45">03 / CROSS-PAGE TRACE</text>
-      <g transform="translate(4 28) scale(.9 .78)">
-        <rect x="35" y="65" width="490" height="350" rx="6" class="drawing-sheet"/><rect x="575" y="65" width="170" height="350" rx="6" class="drawing-sheet"/>
-        {wiringSample.edges.map(edge => <path d={`M${port(edge.a).x} ${port(edge.a).y}L${port(edge.b).x} ${port(edge.b).y}`} class:list={['art-line', { 'art-dimension': edge.status !== 'verified' || edge.kind === 'component', 'art-secondary': edge.status !== 'verified' || edge.kind === 'component' }]}/>)}
-        <rect x="650" y="224" width="60" height="45" class="device-symbol"/>
-        {wiringSample.ports.map(p => <g><circle cx={p.x} cy={p.y} r="8" class="art-point"/><text x={p.x} y={p.y - 25} text-anchor="middle">{p.label}</text></g>)}
-        <text x="55" y="100">PAGE 01</text><text x="595" y="100">PAGE 02</text>
-      </g>
-      <text x="40" y="381">PORT → PATH → DRAWING EVIDENCE</text>
+      <text x="35" y="40">03 / ENGINEERING DRAWING ATLAS</text>
+      <Sheet page="P01" preview />
+      <text x="35" y="407">SWITCH → TERMINAL → RECIPROCAL REFERENCE</text>
     </>}
   </svg>
-  <span class="art-caption">{theme === 'cad' ? 'BH 拆板与展开 · 重建样例' : theme === 'energy' ? '生成气象样例 · 教学出力计算' : '双页追线与图纸定位 · 重建样例'}</span>
+  <span class="art-caption">{theme === 'cad' ? 'BH 拆板与展开 · 重建样例' : theme === 'energy' ? '生成气象样例 · 教学出力计算' : '开关接线与端子排 · 脱敏重绘'}</span>
 </div>

@@ -1,0 +1,65 @@
+---
+import { wiringSample } from './model.mjs';
+interface Props { page: string; preview?: boolean; }
+const { page: pageId, preview = false } = Astro.props;
+const page = wiringSample.pages.find(p => p.id === pageId)!;
+const ports = wiringSample.ports.filter(p => p.page === pageId);
+const rows = wiringSample.edges.filter(e => e.kind === 'direct' && e.status === 'verified');
+const endpoint = (id: string) => wiringSample.ports.find(p => p.id === id)!;
+---
+<svg class:list={['wire-sheet', { 'wiring-canvas': !preview }]} data-drawing-page={preview ? undefined : page.id} viewBox="0 0 1000 640" role={preview ? undefined : 'group'} aria-label={preview ? undefined : `${page.id} ${page.title}，脱敏重绘工程图`} x={preview ? 90 : undefined} y={preview ? 55 : undefined} width={preview ? 540 : undefined} height={preview ? 346 : undefined} xmlns="http://www.w3.org/2000/svg">
+  <rect x="20" y="20" width="960" height="600" class="engineering-paper"/>
+  <path d="M40 40H960V560H40ZM40 584H960M190 560V620M640 560V620M820 560V620" class="engineering-frame"/>
+  {[1, 2, 3, 4, 5, 6].map((n, i) => <text x={116 + i * 153} y="34" text-anchor="middle" class="engineering-grid-label">{n}</text>)}
+  {['A', 'B', 'C', 'D'].map((label, i) => <text x="29" y={110 + i * 145} text-anchor="middle" class="engineering-grid-label">{label}</text>)}
+  <text x="60" y="580" class="engineering-small">RANXIN / PUBLIC</text><text x="60" y="606" class="engineering-small">标识与布局已重建</text>
+  <text x="210" y="580" class="engineering-caption">{page.title}</text><text x="210" y="606" class="engineering-small">{page.code} · 公开展示版</text>
+  <text x="660" y="580" class="engineering-small">图页 / SHEET</text><text x="660" y="606" class="engineering-caption">{page.id} / 02</text>
+  <text x="840" y="580" class="engineering-small">版本 / REV</text><text x="840" y="606" class="engineering-caption">PUBLIC 01</text>
+
+  {pageId === 'P01' ? <>
+    <text x="65" y="72" class="engineering-small">出线与端子排双向引用 · 规格及原线号未公开</text>
+    {[{ x: 210, name: 'HL01' }, { x: 520, name: 'HL02' }].map(lamp => <g>
+      <text x={lamp.x} y="102" text-anchor="middle" class="engineering-caption">{lamp.name}</text>
+      <circle cx={lamp.x} cy="145" r="18" class="engineering-symbol"/><path d={`M${lamp.x - 12} 133L${lamp.x + 12} 157M${lamp.x - 12} 157L${lamp.x + 12} 133M${lamp.x - 40} 145H${lamp.x - 18}M${lamp.x + 18} 145H${lamp.x + 40}`} class="engineering-symbol"/>
+      <text x={lamp.x} y="180" text-anchor="middle" class="engineering-muted">指示支路 · 待核</text>
+    </g>)}
+    {[{ x: 210, name: 'Q01' }, { x: 520, name: 'Q02' }, { x: 820, name: 'Q03' }].map(device => <g>
+      <circle cx={device.x} cy="215" r="24" class="engineering-symbol"/><path d={`M${device.x - 24} 215H${device.x + 24}`} class="engineering-symbol"/>
+      <text x={device.x} y="208" text-anchor="middle" class="engineering-caption">{device.name}</text>
+      <text x={device.x} y="234" text-anchor="middle" class="engineering-grid-label">{device.name === 'Q03' ? '辅助' : '开关'}</text>
+      {device.name !== 'Q03' && <path d={`M${device.x - 40} 329H${device.x + 40}`} class="engineering-mechanical"/>}
+    </g>)}
+    <text x="700" y="180" class="engineering-muted">N01 同网集合</text>
+    {[330, 650, 820].map(x => <g><path d={`M${x} 280V315M${x} 315L${x - 12} 350M${x} 350V390`} class="engineering-symbol"/><text x={x + 15} y="393" class="engineering-small">96</text></g>)}
+    <text x="695" y="420" class="engineering-muted">同网成员不等于逐段直连</text>
+    {rows.map(edge => {
+      const p = endpoint(edge.a), target = endpoint(edge.b);
+      return <g><path d={`M${p.x - 6} 502L${p.x} 510L${p.x + 6} 502`} class="engineering-reference"/><text transform={`translate(${p.x + 17} 504) rotate(-90)`} class="engineering-small">{target.label} / P02</text><text x={p.x - 12} y="444" text-anchor="end" class="engineering-small">{edge.wire}</text></g>;
+    })}
+    <text x="65" y="544" class="engineering-muted">实线：引用已对应　虚线：待核引用　点划线：同网成员</text>
+  </> : <>
+    <text x="500" y="85" text-anchor="middle" class="engineering-title">XT01 / 馈线端子排</text>
+    <text x="500" y="114" text-anchor="middle" class="engineering-muted">按行核对来源端与端子号，保留双端图纸依据</text>
+    <rect x="135" y="135" width="730" height="335" class="engineering-table"/>
+    <path d="M135 170H865M445 135V470M555 135V470M700 135V470" class="engineering-frame"/>
+    <text x="275" y="158" text-anchor="middle" class="engineering-caption">来源 / 图页</text><text x="500" y="158" text-anchor="middle" class="engineering-caption">端子</text><text x="625" y="158" text-anchor="middle" class="engineering-caption">演示线号</text><text x="780" y="158" text-anchor="middle" class="engineering-caption">核对状态</text>
+    {rows.map((edge, index) => <g>
+      <path d={`M135 ${222 + index * 52}H865`} class="engineering-frame"/>
+      <text x="185" y={190 + index * 52} class="engineering-small">{endpoint(edge.a).label} / P01</text>
+      <path d={`M160 ${196 + index * 52}L166 ${202 + index * 52}L160 ${208 + index * 52}`} class="engineering-reference"/>
+      <text x="625" y={207 + index * 52} text-anchor="middle" class="engineering-caption">{edge.wire}</text>
+      <text x="780" y={207 + index * 52} text-anchor="middle" class="engineering-small">双端对应</text>
+    </g>)}
+    <text x="275" y="435" text-anchor="middle" class="engineering-muted">— 其余端子不在公开范围 —</text>
+    <text x="150" y="510" class="engineering-small">线号为公开重编标识；线材参数未公开，材质与颜色保留未核验。</text>
+    <text x="150" y="540" class="engineering-muted">编号相邻、同一端子排、同名标签均不自动表示导通。</text>
+  </>}
+
+  <g data-wiring-edges>{wiringSample.edges.flatMap(edge => edge.strokes.filter(s => s.page === pageId).map(stroke => <g data-edge-id={preview ? undefined : edge.id} class:list={['wire-edge', edge.kind, edge.status]}><path d={stroke.d}/></g>))}</g>
+  <rect data-evidence-focus={preview ? undefined : ''} visibility="hidden" x="0" y="0" width="0" height="0" rx="5" class="evidence-focus"/>
+  <g data-wiring-ports>{ports.map(p => <g data-port-id={preview ? undefined : p.id} class:list={['wire-port', { 'terminal-port': pageId === 'P02' }]}>
+    {pageId === 'P02' ? <><rect class="terminal-face" x={p.x - 28} y={p.y - 18} width="56" height="36"/><circle cx={p.x - 10} cy={p.y} r="7"/><path d={`M${p.x - 14} ${p.y}H${p.x - 6}M${p.x - 10} ${p.y - 4}V${p.y + 4}`} class="engineering-symbol"/><text x={p.x + 12} y={p.y + 5} text-anchor="middle">{p.terminal}</text></> : <><circle cx={p.x} cy={p.y} r="9"/><text x={p.x + (p.terminal === '95' ? 15 : 0)} y={p.y - 17} text-anchor={p.terminal === '95' ? 'start' : 'middle'}>{p.terminal}</text></>}
+    {!preview && <rect class="port-hit" x={p.x - 27} y={p.y - 25} width="54" height="50" rx="4"/>}
+  </g>)}</g>
+</svg>

@@ -75,21 +75,24 @@ test('forecast controls change real metrics and time selection is keyboard acces
   await expect(page.getByLabel('预测方案')).toHaveValue('sample');
 });
 
-test('wiring views separate direct, confirmed, pending and conflicting relationships', async ({ page }) => {
+test('wiring views separate reciprocal references, same-network members and pending branches', async ({ page }) => {
   await page.goto(url('projects/electrical-drawings/'));
   await page.getByRole('button', { name: '已确认网络', exact: true }).click();
-  await expect(page.locator('[data-wiring-results]')).toContainText('B:1');
-  await expect(page.locator('[data-wiring-results]')).not.toContainText('B:2');
-  await expect(page.locator('[data-wiring-results]')).not.toContainText('C:1');
-  await page.getByLabel('搜索端口').fill('A:3');
-  await page.getByRole('button', { name: '选择端口 A:3', exact: true }).click();
+  await expect(page.locator('[data-wiring-results]')).toContainText('XT01:21');
+  await expect(page.locator('[data-wiring-results]')).not.toContainText('HL01');
+  await page.getByLabel('搜索端口').fill('Q02:2');
+  await page.getByRole('button', { name: '选择端口 Q02:2', exact: true }).click();
   await page.getByRole('button', { name: '待核信息', exact: true }).click();
   await expect(page.locator('[data-wiring-results]')).toContainText('待核');
   await page.getByRole('button', { name: /查看依据/ }).first().click();
-  await expect(page.locator('[data-evidence]')).toContainText('样例页');
-  await page.getByLabel('搜索端口').fill('A:2');
-  await page.getByRole('button', { name: '选择端口 A:2', exact: true }).click();
-  await expect(page.locator('[data-wiring-results]')).toContainText('冲突');
+  await expect(page.locator('[data-evidence]')).toContainText('P01');
+  await page.getByLabel('搜索端口').fill('Q01:95');
+  await page.getByRole('button', { name: '选择端口 Q01:95', exact: true }).click();
+  await page.getByRole('button', { name: '已确认网络', exact: true }).click();
+  await expect(page.locator('[data-wiring-results]')).toContainText('Q02:95');
+  await expect(page.locator('[data-wiring-results]')).toContainText('Q03:95');
+  await page.getByRole('button', { name: '直接连接', exact: true }).click();
+  await expect(page.locator('[data-wiring-results]')).toContainText('没有已确认连接');
   await page.getByRole('button', { name: '重置体验' }).click();
   await expect(page.getByLabel('搜索端口')).toHaveValue('');
   await page.getByLabel('搜索端口').fill('不存在');
@@ -119,7 +122,7 @@ test('every experience has useful static output without JavaScript', async ({ br
   const page = await context.newPage();
   for (const slug of ['dwg-agent', 'renewable-forecasting', 'electrical-drawings']) {
     await page.goto(new URL(url(`projects/${slug}/`), process.env.TEST_URL || 'http://127.0.0.1:4321').toString());
-    await expect(page.locator('[data-case-panel="experience"] > [data-experience] .demo-visual > svg').first()).toBeVisible();
+    await expect(page.locator('[data-case-panel="experience"] > [data-experience] .demo-visual svg').first()).toBeVisible();
     await expect(page.locator('[data-demo-controls]:visible')).toHaveCount(0);
     await expect(page.locator('[data-demo-action]:visible')).toHaveCount(0);
     await expect(page.getByRole('heading', { name: '我负责的部分' })).toBeVisible();
@@ -143,7 +146,7 @@ test('interactive routes work with all other origins blocked and reset on refres
   await expect(page.getByRole('button', { name: '展平', exact: true })).toBeVisible();
   await page.goto(url('projects/electrical-drawings/'));
   await page.getByRole('button', { name: '已确认网络', exact: true }).click();
-  await expect(page.locator('[data-wiring-results]')).toContainText('B:1');
+  await expect(page.locator('[data-wiring-results]')).toContainText('XT01:21');
   expect(errors).toEqual([]);
 });
 

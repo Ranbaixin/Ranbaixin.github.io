@@ -127,11 +127,11 @@ test('cross-page traces are ordered and never traverse pending, conflict or comp
   assert.equal(typeof wiring.tracePath, 'function', 'Ordered cross-page evidence tracing is required');
   const sample = wiring.wiringSample;
   const path = wiring.tracePath(sample, 'p1', 'p4');
-  assert.deepEqual(path.portIds, ['p1', 'p2', 'p3', 'p4']);
-  assert.deepEqual(path.edgeIds, ['e1', 'e2', 'e3']);
-  assert.deepEqual(path.pages, ['01', '02']);
+  assert.deepEqual(path.portIds, ['p1', 'p4']);
+  assert.deepEqual(path.edgeIds, ['e1']);
+  assert.deepEqual(path.pages, ['P01', 'P02']);
   for (const target of ['p5', 'p6', 'p7']) assert.equal(wiring.tracePath(sample, 'p1', target), null);
-  assert.deepEqual(wiring.tracePath(sample, 'p4', 'p1').edgeIds, ['e3', 'e2', 'e1']);
+  assert.deepEqual(wiring.tracePath(sample, 'p4', 'p1').edgeIds, ['e1']);
 });
 
 test('ribbon repeats cover wide viewports throughout positive and reverse scrolling', () => {

@@ -1,25 +1,5 @@
-/** Entirely reconstructed port names, graph, page references and coordinates. */
-export const wiringSample = {
-  ports: [
-    { id: 'p1', label: 'A:1', x: 90, y: 150, page: '01', description: '样例输入端' },
-    { id: 'p2', label: 'A:2', x: 270, y: 150, page: '01', description: '样例桥接端' },
-    { id: 'p3', label: 'A:3', x: 450, y: 150, page: '01', description: '样例跨页端' },
-    { id: 'p4', label: 'B:1', x: 680, y: 150, page: '02', description: '样例器件输入端' },
-    { id: 'p5', label: 'B:2', x: 680, y: 345, page: '02', description: '样例器件另一端' },
-    { id: 'p6', label: 'C:1', x: 450, y: 345, page: '01', description: '待核目标端' },
-    { id: 'p7', label: 'C:2', x: 270, y: 345, page: '01', description: '存在冲突的引用目标' },
-    { id: 'p8', label: 'D:1', x: 90, y: 345, page: '01', description: '独立支路端' },
-  ],
-  edges: [
-    { id: 'e1', a: 'p1', b: 'p2', kind: 'direct', status: 'verified', evidence: '样例页 01 · 上方导线', note: '已确认导线' },
-    { id: 'e2', a: 'p2', b: 'p3', kind: 'bridge', status: 'verified', evidence: '样例页 01 · 端子桥接', note: '已确认桥接' },
-    { id: 'e3', a: 'p3', b: 'p4', kind: 'cross-page', status: 'verified', evidence: '样例页 01 ↔ 02 · 跨页对应', note: '已确认跨页关系' },
-    { id: 'e4', a: 'p4', b: 'p5', kind: 'component', status: 'verified', evidence: '样例页 02 · 器件边界', note: '器件内部关系不推断导通' },
-    { id: 'e5', a: 'p3', b: 'p6', kind: 'direct', status: 'pending', evidence: '样例页 01 · 下方候选线', note: '目标端尚待核对' },
-    { id: 'e6', a: 'p2', b: 'p7', kind: 'cross-page', status: 'conflict', evidence: '样例页 01 · 引用冲突', note: '两个引用解释存在冲突' },
-    { id: 'e7', a: 'p7', b: 'p8', kind: 'direct', status: 'verified', evidence: '样例页 01 · 独立支路', note: '已确认导线' },
-  ],
-};
+import { wiringSample } from './sample.mjs';
+export { wiringSample };
 
 /** @param {typeof wiringSample} sample @param {string} query */
 export function searchPorts(sample, query) {
@@ -36,7 +16,7 @@ export function queryConnections(sample, portId, mode = 'direct') {
   const adjacent = edge => edge.a === portId || edge.b === portId;
   /** @type {typeof wiringSample.edges} */
   let edges = [];
-  if (mode === 'pending') edges = sample.edges.filter(edge => edge.status !== 'verified' && adjacent(edge));
+  if (mode === 'pending') edges = sample.edges.filter(edge => edge.kind !== 'component' && ['pending', 'conflict'].includes(edge.status) && adjacent(edge));
   else if (mode === 'direct') edges = confirmed.filter(edge => ['direct', 'bridge'].includes(edge.kind) && adjacent(edge));
   else {
     const visited = new Set([portId]);
@@ -49,7 +29,7 @@ export function queryConnections(sample, portId, mode = 'direct') {
     }
     edges = confirmed.filter(edge => visited.has(edge.a) && visited.has(edge.b));
   }
-  return { port, edges, portIds: [...new Set([portId, ...edges.flatMap(edge => [edge.a, edge.b])])] };
+  return { port, edges, portIds: [...new Set([portId, ...edges.flatMap(edge => [edge.a, edge.b])])].filter(id => sample.ports.some(p => p.id === id)) };
 }
 
 /** Ordered path and drawing pages; a relation inside a device is never a conductor. */
@@ -57,7 +37,7 @@ export function tracePath(sample, sourceId, targetId) {
   if (![sourceId, targetId].every(id => sample.ports.some(p => p.id === id))) return null;
   const queue = [sourceId], visited = new Set(queue), previous = new Map();
   for (let i = 0; i < queue.length && !visited.has(targetId); i++) {
-    for (const edge of sample.edges.filter(e => e.status === 'verified' && e.kind !== 'component')) {
+    for (const edge of sample.edges.filter(e => e.status === 'verified' && !['component', 'network'].includes(e.kind))) {
       const next = edge.a === queue[i] ? edge.b : edge.b === queue[i] ? edge.a : null;
       if (!next || visited.has(next)) continue;
       visited.add(next); previous.set(next, { port: queue[i], edge: edge.id }); queue.push(next);
@@ -70,4 +50,44 @@ export function tracePath(sample, sourceId, targetId) {
     portIds.unshift(step.port); edgeIds.unshift(step.edge);
   }
   return { portIds, edgeIds, pages: [...new Set(portIds.map(id => sample.ports.find(p => p.id === id).page))] };
+}
+
+/** @param {{width: number, height: number}} sheet @param {{x: number, y: number, width: number, height: number} | null} focus */
+export function drawingViewport(sheet, focus = null, zoom = 1) {
+  const factor = Math.max(1, Math.min(3, Number.isFinite(zoom) ? zoom : 1));
+  const width = sheet.width / factor, height = sheet.height / factor;
+  const centerX = focus ? focus.x + focus.width / 2 : sheet.width / 2;
+  const centerY = focus ? focus.y + focus.height / 2 : sheet.height / 2;
+  return { x: Math.max(0, Math.min(sheet.width - width, centerX - width / 2)), y: Math.max(0, Math.min(sheet.height - height, centerY - height / 2)), width, height };
+}
+
+/** Reject unapproved source metadata before a public build. */
+export function validateWiringSample(sample) {
+  const errors = [], ids = new Set();
+  const fields = (value, allowed) => { for (const key of Object.keys(value)) if (!allowed.includes(key)) errors.push(`unsupported drawing field: ${key}`); };
+  fields(sample, ['version', 'disclosure', 'pages', 'ports', 'nodes', 'edges']);
+  if (sample.version !== 'wiring-v3' || !sample.disclosure) errors.push('public drawing version required');
+  const pages = new Map(sample.pages.map(p => [p.id, p]));
+  for (const p of sample.pages) fields(p, ['id', 'title', 'code', 'width', 'height']);
+  for (const p of [...sample.ports, ...sample.nodes]) {
+    fields(p, ['id', 'label', 'page', 'x', 'y', 'device', 'terminal', 'description']);
+    const page = pages.get(p.page);
+    if (ids.has(p.id) || !page || !Number.isFinite(p.x) || !Number.isFinite(p.y) || p.x < 0 || p.y < 0 || p.x > page.width || p.y > page.height) errors.push('invalid public port');
+    ids.add(p.id);
+  }
+  const edges = new Set();
+  for (const e of sample.edges) {
+    fields(e, ['id', 'a', 'b', 'kind', 'status', 'wire', 'evidence', 'note', 'views', 'strokes']);
+    if (edges.has(e.id) || !ids.has(e.a) || !ids.has(e.b) || !['direct', 'network', 'component'].includes(e.kind) || !['verified', 'pending', 'conflict', 'boundary'].includes(e.status)) errors.push('invalid public relation');
+    edges.add(e.id);
+    if (e.kind !== 'component' && !e.views.length) errors.push('drawing evidence required');
+    if (e.kind === 'direct' && e.status === 'verified' && new Set(e.views.map(v => v.page)).size !== 2) errors.push('both reference pages required');
+    for (const v of e.views) {
+      fields(v, ['page', 'zone', 'label', 'bounds']); fields(v.bounds, ['x', 'y', 'width', 'height']);
+      const page = pages.get(v.page), b = v.bounds;
+      if (!page || !v.zone || b.width <= 0 || b.height <= 0 || ![b.x, b.y, b.width, b.height].every(Number.isFinite) || b.x < 0 || b.y < 0 || b.x + b.width > page.width || b.y + b.height > page.height) errors.push('invalid evidence bounds');
+    }
+    for (const s of e.strokes) { fields(s, ['page', 'd']); if (!pages.has(s.page) || !/^[MLHV\d\s.,-]+$/.test(s.d)) errors.push('invalid public drawing stroke'); }
+  }
+  return errors;
 }

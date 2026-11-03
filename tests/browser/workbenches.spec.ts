@@ -84,17 +84,18 @@ test('cross-page trace highlights ordered evidence and stops at device interiors
   await expect(wiring).toHaveAttribute('data-enhanced', 'true');
   await wiring.locator('[data-trace-target]').selectOption('p4');
   await wiring.locator('[data-trace-start]').click();
-  await expect(wiring.locator('[data-trace-summary]')).toContainText('A:1 → A:2 → A:3 → B:1');
-  await expect(wiring.locator('[data-edge-id].traced')).toHaveCount(3);
+  await expect(wiring.locator('[data-trace-summary]')).toContainText('Q01:2 → XT01:21');
+  await expect(wiring.locator('[data-edge-id="e1"].traced')).toHaveCount(2);
   await wiring.locator('[data-trace-target]').selectOption('p5');
   await wiring.locator('[data-trace-start]').click();
-  await expect(wiring.locator('[data-trace-summary]')).toContainText('未找到已确认路径');
+  await expect(wiring.locator('[data-trace-summary]')).toContainText('未找到已确认的逐段路径');
   await expect(wiring.locator('[data-edge-id].traced')).toHaveCount(0);
-  await wiring.getByRole('button', { name: '图中端口 A:3', exact: true }).click();
+  await wiring.locator('[data-sheet-button="P01"]').click();
+  await wiring.getByRole('button', { name: '图中端口 Q02:2', exact: true }).click();
   await wiring.getByRole('button', { name: '待核信息', exact: true }).click();
-  await wiring.getByRole('button', { name: '查看依据：A:3 与 C:1' }).click();
-  await expect(wiring.locator('[data-evidence]')).toContainText('样例页 01');
-  await expect(wiring.locator('[data-evidence-focus]')).toBeVisible();
+  await wiring.getByRole('button', { name: '查看依据：Q02:2 与 HL02:1' }).click();
+  await expect(wiring.locator('[data-evidence]')).toContainText('P01');
+  await expect(wiring.locator('[data-evidence-focus][visibility="visible"]')).toBeVisible();
 });
 
 test('looping ribbon has no empty edge on ultrawide, reverse scroll and resize', async ({ page }) => {
