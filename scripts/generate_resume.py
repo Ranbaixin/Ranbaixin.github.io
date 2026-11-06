@@ -50,12 +50,12 @@ styles = {
 def para(text, style="body"):
     return Paragraph(escape(text), styles[style])
 
-story = [para(data["profile"]["name"], "name"), para(data["profile"]["nicknameEn"] + " · " + data["profile"]["nicknameZh"], "tag"), para(data["profile"]["tagline"], "tag")]
-story += [para(data["profile"]["email"] + "  |  " + data["profile"]["location"], "contact"), Spacer(1, 10)]
+story = [para(data["profile"]["nicknameEn"], "name"), para(data["profile"]["nicknameZh"], "tag"), para(data["profile"]["tagline"], "tag")]
+story += [para(data["profile"]["githubUrl"] + "  |  " + data["profile"]["location"], "contact"), Spacer(1, 10)]
 story += [para("个人介绍", "heading"), para(data["profile"]["intro"])]
 education = data["education"]
 story += [para("教育与研究", "heading"), para(f'{education["school"]} · {education["college"]} · {education["major"]}', "title")]
-story += [para(f'{education["enrolled"]} 级 · 预计 {education["expectedGraduation"]} 年毕业', "muted"), para(education["description"])]
+story += [para(education["description"])]
 story += [para("项目经历", "heading")]
 for project in data["projects"]:
     block = [para(project["title"], "title"), para(project["period"] + "  |  " + project["role"], "muted")]
@@ -70,8 +70,8 @@ output = root / "public/resume.pdf"
 output.parent.mkdir(parents=True, exist_ok=True)
 
 def decorate(canvas, doc):
-    canvas.setTitle(data["profile"]["name"] + " - 公开简历")
-    canvas.setAuthor(data["profile"]["name"])
+    canvas.setTitle(data["profile"]["nicknameEn"] + " - 公开简历")
+    canvas.setAuthor(data["profile"]["nicknameEn"])
     canvas.setSubject("content-sha256:" + digest)
     canvas.setCreator("Personal portfolio resume generator")
     canvas.setStrokeColor(blue)
@@ -79,7 +79,7 @@ def decorate(canvas, doc):
     canvas.line(45, A4[1] - 28, A4[0] - 45, A4[1] - 28)
     canvas.setFont("PortfolioCJK", 7)
     canvas.setFillColor(muted)
-    canvas.drawString(45, 24, data["profile"]["name"] + " · 公开简历")
+    canvas.drawString(45, 24, data["profile"]["nicknameEn"] + " · 公开简历")
     canvas.drawRightString(A4[0] - 45, 24, str(doc.page))
 
 document = SimpleDocTemplate(str(output), pagesize=A4, topMargin=40, bottomMargin=40, leftMargin=45, rightMargin=45)

@@ -15,7 +15,7 @@ const endpoint = (id: string) => wiringSample.ports.find(p => p.id === id)!;
       <div class="drawing-toolbar" data-drawing-toolbar hidden><div class="drawing-pages" role="group" aria-label="选择图页">{wiringSample.pages.map((page, i) => <button type="button" data-sheet-button={page.id} aria-pressed={i === 0}>{page.id} · {i === 0 ? '接线' : '端子排'}</button>)}</div><div class="drawing-zoom" role="group" aria-label="图纸缩放"><button type="button" data-drawing-zoom="out" aria-label="缩小图纸">−</button><button type="button" data-drawing-zoom="fit" aria-label="显示整页">整页</button><button type="button" data-drawing-zoom="in" aria-label="放大图纸">＋</button></div></div>
       <p class="drawing-page-status" data-page-status>P01 馈线开关接线 / P02 端子排对照</p>
       <div class="drawing-viewport" data-drawing-viewport>{wiringSample.pages.map(page => <Sheet page={page.id}/>)}</div>
-      <p class="drawing-instruction">选择端口或“查看依据”定位局部；放大后可拖动，键盘方向键可移动图面。</p>
+      <p class="drawing-instruction"><span data-input-hint="generic">静态图纸样例：对照接线页与端子排，阅读下方连接说明。</span><span data-input-hint="controls">选择端口或“查看依据”定位；使用缩放按钮调整图面。</span><span data-input-hint="touch">点按端口或“查看依据”定位；使用缩放按钮，放大后可单指拖动图面。</span><span data-input-hint="pointer">点击端口或“查看依据”定位；放大后可拖动，方向键移动图面，＋／− 缩放。</span></p>
       <div class="object-caption"><span class="status-dot"></span><span data-wiring-selection>Q01:2 · P01 · 馈线开关出线端</span></div>
     </div>
     <aside class="demo-controls" data-demo-controls hidden aria-label="端口查询控件">

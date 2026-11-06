@@ -13,10 +13,13 @@ export function validateContent(data) {
   const required = (object, fields, label) => fields.forEach(key => {
     if (typeof object?.[key] !== 'string' || !object[key].trim()) errors.push(`${label}.${key} is required`);
   });
-  required(data?.profile, ['name', 'nicknameEn', 'nicknameZh', 'email', 'intro'], 'profile');
-  if (data?.profile?.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.profile.email)) errors.push('profile.email is invalid');
+  required(data?.profile, ['nicknameEn', 'nicknameZh', 'githubUrl', 'intro'], 'profile');
+  const profileFields = new Set(['nicknameEn', 'nicknameZh', 'initials', 'tagline', 'githubUrl', 'location', 'advisor', 'intro', 'focus']);
+  for (const key of Object.keys(data?.profile || {})) if (!profileFields.has(key)) errors.push(`private or unsupported profile.${key}`);
+  if (!/^https:\/\/github\.com\/[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})\/?$/.test(data?.profile?.githubUrl || '')) errors.push('profile.githubUrl must be a public HTTPS GitHub profile');
   required(data?.education, ['school', 'major'], 'education');
-  if (!(data?.education?.expectedGraduation > data?.education?.enrolled)) errors.push('education years are invalid');
+  const educationFields = new Set(['school', 'college', 'major', 'description']);
+  for (const key of Object.keys(data?.education || {})) if (!educationFields.has(key)) errors.push(`private or unsupported education.${key}`);
   const slugs = new Set();
   if (!Array.isArray(data?.projects) || !data.projects.length) errors.push('projects are required');
   for (const project of data?.projects || []) {
@@ -33,7 +36,7 @@ export function validateContent(data) {
     const allowed = new Set(['slug', 'title', 'shortTitle', 'category', 'categoryLabel', 'start', 'period', 'role', 'summary', 'background', 'responsibilities', 'outcomes', 'methods', 'verification', 'reflection', 'number', 'theme', 'demo']);
     for (const key of Object.keys(project)) if (!allowed.has(key)) errors.push(`private or unsupported project field: ${key}`);
   }
-  if (/[A-Z]:[\\/]|\/opt\/|\/etc\/|-----BEGIN .*PRIVATE KEY|(?:token|password)\s*[:=]/i.test(JSON.stringify(data))) errors.push('private material cannot publish');
+  if (/(?:^|["'\s])[A-Z]:[\\/]|\/opt\/|\/etc\/|-----BEGIN .*PRIVATE KEY|(?:token|password)\s*[:=]/i.test(JSON.stringify(data))) errors.push('private material cannot publish');
   if (!Array.isArray(data?.honors) || !data.honors.length) errors.push('honors are required');
   for (const honor of data?.honors || []) {
     required(honor, ['title', 'level'], 'honor');

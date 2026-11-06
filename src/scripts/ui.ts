@@ -75,21 +75,6 @@ if (filters) {
   }));
 }
 
-const copyButton = document.querySelector<HTMLButtonElement>('[data-copy-email]');
-if (copyButton) {
-  copyButton.hidden = false;
-  copyButton.addEventListener('click', async () => {
-    const status = document.querySelector('[data-copy-status]');
-    try {
-      if (!navigator.clipboard) throw new Error('Clipboard unavailable');
-      await navigator.clipboard.writeText(copyButton.dataset.copyEmail || '');
-      if (status) status.textContent = '邮箱已复制';
-    } catch {
-      if (status) status.textContent = '请选中上方邮箱手动复制。';
-    }
-  });
-}
-
 const printButton = document.querySelector<HTMLButtonElement>('[data-print]');
 if (printButton) { printButton.hidden = false; printButton.addEventListener('click', () => window.print()); }
 

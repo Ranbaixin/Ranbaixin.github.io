@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <radialGradient id="glow"><stop stop-color="#275fe7" stop-opacity=".24"/><stop offset="1" stop-color="#275fe7" stop-opacity="0"/></radialGradient>
+    <pattern id="grid" width="36" height="36" patternUnits="userSpaceOnUse"><path d="M36 0H0V36" fill="none" stroke="#8babff" stroke-opacity=".07"/></pattern>
+  </defs>
+  <rect width="1200" height="630" fill="#0d1929"/>
+  <ellipse cx="970" cy="300" rx="570" ry="500" fill="url(#glow)"/>
+  <rect x="760" width="440" height="630" fill="url(#grid)"/>
+  <g font-family="Segoe UI,Microsoft YaHei,sans-serif">
+    <circle cx="79" cy="84" r="5" fill="#8babff"/>
+    <text x="98" y="90" fill="#a6b7cf" font-size="15" letter-spacing="3">IDEAS INTO PRACTICE</text>
+    <text x="68" y="258" fill="#e8efff" font-size="152" font-weight="700" letter-spacing="-9">Ranxin<tspan fill="#8babff">.</tspan></text>
+    <text x="79" y="320" fill="#8babff" font-size="37" letter-spacing="10">然鑫</text>
+    <text x="79" y="404" fill="#d6e2f7" font-size="25">用计算，连接真实问题。</text>
+    <text x="80" y="446" fill="#92a9c8" font-size="17">DATA SCIENCE / ENGINEERING AUTOMATION</text>
+    <path d="M79 503H679" stroke="#30445f"/>
+    <text x="79" y="554" fill="#a6b7cf" font-size="19">ranbaixin.github.io</text>
+    <text x="660" y="556" fill="#8babff" font-size="30">↗</text>
+  </g>
+  <g fill="#12243d" stroke="#314c73"><rect x="803" y="55" width="330" height="150" rx="15"/><rect x="803" y="240" width="330" height="150" rx="15"/><rect x="803" y="425" width="330" height="150" rx="15"/></g>
+  <g font-family="Consolas,monospace" font-size="12" letter-spacing="2" fill="#a3bbeb"><text x="826" y="82">01 / SPLIT</text><text x="826" y="267">02 / FORECAST</text><text x="826" y="452">03 / TRACE</text></g>
+  <g fill="#8babff" fill-opacity=".12" stroke="#8babff" stroke-width="2" stroke-linejoin="round">
+    <path d="M858 113l98-14 57 15-98 14zM858 158l98-14 57 15-98 14zM955 126v28l7 2v-28z"/>
+    <path d="M1042 111l62-9v16l-62 9zM1042 154l62-9v16l-62 9z" fill-opacity=".28"/>
+    <path d="M1017 132h17m-6-5 6 5-6 5" fill="none"/>
+  </g>
+  <g fill="none" stroke-linecap="round" stroke-width="2"><path d="M831 364h274M840 285v79" stroke="#395777"/><path d="M846 345q24-6 42-27t36-6 41 15 44-28 44-5 45-9" stroke="#73cfc8"/><path d="M846 344q24-2 42-16t36-9 41 6 44-18 44-6 45-6" stroke="#8babff" stroke-dasharray="5 7"/></g>
+  <g stroke="#8babff" stroke-width="2" fill="none"><path d="M852 491h61v54h44m0-54h49v54h48"/><path d="M913 491h44m49 54h48" stroke="#73cfc8" stroke-dasharray="4 5"/><rect x="846" y="485" width="12" height="12" rx="2"/><rect x="951" y="539" width="12" height="12" rx="2"/><rect x="1048" y="539" width="12" height="12" rx="2"/></g>
+  <g fill="#73cfc8"><circle cx="913" cy="491" r="4"/><circle cx="1006" cy="545" r="4"/></g>
+</svg>

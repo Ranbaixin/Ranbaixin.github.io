@@ -42,18 +42,16 @@ test('each detail route survives refresh and assets stay on the current origin',
   expect(missing.status()).toBe(404);
 });
 
-test('theme, reduced motion, storage failure, and manual clipboard fallback', async ({ page }) => {
+test('theme, reduced motion, storage failure, and public GitHub contact', async ({ page }) => {
   await page.addInitScript(() => {
     Object.defineProperty(window, 'localStorage', { get() { throw new Error('Storage blocked'); } });
-    Object.defineProperty(navigator, 'clipboard', { value: undefined });
   });
   await page.goto(url());
   await page.locator('[data-theme-toggle]').click();
   await expect(page.locator('html')).toHaveAttribute('data-theme', /light|dark/);
   await page.locator('[data-motion-toggle]').click();
   await expect(page.locator('html')).toHaveAttribute('data-motion', 'reduce');
-  await page.locator('[data-copy-email]').click();
-  await expect(page.locator('[data-copy-status]')).toContainText('手动复制');
+  await expect(page.locator('#contact a[href="https://github.com/Ranbaixin"]')).toBeVisible();
 });
 
 test('mobile layout and system reduced motion preserve readable content', async ({ page }) => {
@@ -67,15 +65,15 @@ test('mobile layout and system reduced motion preserve readable content', async 
   expect(await page.locator('[data-home-workbench]').evaluate(el => el.getAnimations({ subtree: true }).length)).toBe(0);
 });
 
-test('without JavaScript the resume, full project list, navigation and email remain usable', async ({ browser }) => {
+test('without JavaScript the resume, full project list, navigation and GitHub remain usable', async ({ browser }) => {
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();
   await page.goto(new URL(url(), process.env.TEST_URL || 'http://127.0.0.1:4321').toString());
   await expect(page.locator('[data-project-category]')).toHaveCount(3);
   await expect(page.locator('#journey')).toContainText('马跃');
-  await expect(page.getByRole('link', { name: /[removed]/ })).toBeVisible();
+  await expect(page.locator('#contact a[href="https://github.com/Ranbaixin"]')).toBeVisible();
   await page.goto(new URL(url('resume/'), process.env.TEST_URL || 'http://127.0.0.1:4321').toString());
-  await expect(page.locator('.resume-sheet')).toContainText('Ranxin');
+  await expect(page.locator('.resume-sheet')).toContainText('信息与计算科学');
   await expect(page.locator('.resume-project')).toHaveCount(3);
   await context.close();
 });

@@ -116,11 +116,11 @@ test('looping ribbon has no empty edge on ultrawide, reverse scroll and resize',
   }
 });
 
-test('system pointer and updated award stay consistent without changing enrollment', async ({ page }) => {
+test('system pointer and updated award stay consistent without publishing education dates', async ({ page }) => {
   await page.goto(url());
   await expect(page.locator('.motion-cursor')).toHaveCount(0);
   await expect(page.locator('#honors')).toContainText('2026 年大学生电子设计大赛');
   await page.goto(url('resume/'));
   await expect(page.locator('main')).toContainText('2026 年大学生电子设计大赛');
-  await expect(page.locator('main')).toContainText('Ranxin');
+  await expect(page.locator('.resume-sheet')).not.toContainText(/\d{4}\s*(?:级|年毕业)/);
 });

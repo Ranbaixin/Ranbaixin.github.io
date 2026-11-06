@@ -5,10 +5,20 @@ import '../styles/global.css';
 import '../styles/portfolio.css';
 import '../styles/motion.css';
 import Profile from '../components/Profile.astro';
-interface Props { title?: string; description?: string; resume?: boolean; }
-const { title = `${content.profile.nicknameEn} · ${content.profile.nicknameZh}｜数据科学与工程自动化`, description = '探索数据科学与工程自动化，用计算连接真实问题。通过三个可交互的项目样例，认识 Ranxin 的实践。', resume = false } = Astro.props;
+interface Props { title?: string; description?: string; resume?: boolean; person?: boolean; noindex?: boolean; }
+const { title = `${content.profile.nicknameEn} · ${content.profile.nicknameZh}｜数据科学与工程自动化`, description = '探索数据科学与工程自动化，用计算连接真实问题。通过三个可交互的项目样例，认识 Ranxin 的实践。', resume = false, person = false, noindex = false } = Astro.props;
 const link = (path = '') => withBase(import.meta.env.BASE_URL, path);
 const canonical = new URL(Astro.url.pathname, Astro.site);
+const image = new URL(link('social/ranxin-card.png'), Astro.site);
+const imageAlt = 'Ranxin / 然鑫：拆板、气象与出力、工程图追线';
+const home = new URL(link(), Astro.site);
+const personData = {
+  '@context': 'https://schema.org', '@type': 'Person', '@id': `${home.href}#person`,
+  name: content.profile.nicknameEn, alternateName: content.profile.nicknameZh,
+  url: home.href, description: content.profile.tagline,
+  affiliation: { '@type': 'CollegeOrUniversity', name: content.education.school, department: { '@type': 'Organization', name: content.education.college } },
+  knowsAbout: ['数据科学', '机器学习', '工程自动化'], sameAs: [content.profile.githubUrl]
+};
 const icpNumber = import.meta.env.PUBLIC_ICP_NUMBER;
 ---
 <!doctype html>
@@ -19,11 +29,25 @@ const icpNumber = import.meta.env.PUBLIC_ICP_NUMBER;
     <meta name="description" content={description} />
     <meta name="theme-color" content="#f4f8ff" />
     <link rel="icon" type="image/svg+xml" href={link('favicon.svg')} />
+    <link rel="icon" type="image/x-icon" sizes="32x32" href={link('favicon.ico')} />
     <link rel="canonical" href={canonical} />
+    <link rel="sitemap" href={link('sitemap-index.xml')} />
+    {noindex && <meta name="robots" content="noindex, follow" />}
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
     <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={image} />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={imageAlt} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={image} />
+    <meta name="twitter:image:alt" content={imageAlt} />
+    {person && <script is:inline type="application/ld+json" set:html={JSON.stringify(personData).replace(/</g, '\\u003c')} />}
     <title>{title}</title>
     <script is:inline>
       try {

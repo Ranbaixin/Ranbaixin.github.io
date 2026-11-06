@@ -33,6 +33,17 @@
 .drawing-viewport[data-panning=true] .wiring-canvas { cursor: grabbing; }
 .drawing-viewport .wire-port { cursor: pointer; }
 .drawing-instruction { padding: 0 25px 12px; font-size: 10px; color: var(--muted); }
+.drawing-instruction [data-input-hint]:not([data-input-hint=generic]) { display: none; }
+[data-enhanced=true] .drawing-instruction [data-input-hint=generic] { display: none; }
+[data-enhanced=true] .drawing-instruction [data-input-hint=controls] { display: inline; }
+@media (pointer: fine) {
+  [data-enhanced=true] .drawing-instruction [data-input-hint=controls] { display: none; }
+  [data-enhanced=true] .drawing-instruction [data-input-hint=pointer] { display: inline; }
+}
+@media (pointer: coarse) {
+  [data-enhanced=true] .drawing-instruction [data-input-hint=controls] { display: none; }
+  [data-enhanced=true] .drawing-instruction [data-input-hint=touch] { display: inline; }
+}
 .evidence-navigation { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
 .evidence-navigation button[aria-pressed=true] { border-color: var(--accent); background: var(--soft); }
 .evidence-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 22px; margin-top: 15px; font-size: 12px; }

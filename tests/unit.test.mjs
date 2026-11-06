@@ -16,17 +16,32 @@ test('path helper rejects traversal and external destinations', () => {
 });
 
 const valid = () => ({
-  profile: { name: 'Example', nicknameEn: 'Ranxin', nicknameZh: '然鑫', email: 'example@example.org', intro: 'Public introduction' },
-  education: { school: 'Example University', major: 'Computing', },
+  profile: { nicknameEn: 'Ranxin', nicknameZh: '然鑫', githubUrl: 'https://github.com/Ranbaixin', intro: 'Public introduction' },
+  education: { school: 'Example University', major: 'Computing' },
   projects: [{ slug: 'example', title: 'Example', category: 'engineering', start: '2026-05', role: 'Member', summary: 'Public summary', responsibilities: ['Work'], background: 'Problem', outcomes: ['Team output'], methods: ['Method'], verification: 'Partial validation', reflection: 'Reflection', demo: { type: 'cad-flow', sample: 'cad-v1' } }],
-  honors: [{ title: 'Competition', year: 2025, level: 'Third prize' }]
+  honors: [{ title: 'Competition', year: 2024, level: 'Third prize' }]
 });
 
 test('publication validation accepts public content and rejects missing facts', () => {
   assert.deepEqual(validateContent(valid()), []);
   const data = valid();
-  data.profile.email = '';
-  assert.match(validateContent(data).join(';'), /email/);
+  data.profile.nicknameZh = '';
+  assert.match(validateContent(data).join(';'), /nicknameZh/);
+});
+
+test('publication rejects reintroduced private identity and educational dates', () => {
+  for (const [section, key, value] of [['profile', 'name', 'Example Person'], ['profile', 'email', 'private@example.invalid'], ['education', 'enrolled', 2022], ['education', 'expectedGraduation', 2026]]) {
+    const data = valid();
+    data[section][key] = value;
+    assert.match(validateContent(data).join(';'), new RegExp(`${section}\\.${key}`));
+  }
+});
+
+test('contact destinations must be a public HTTPS GitHub profile', () => {
+  for (const githubUrl of ['javascript:alert(1)', 'https://github.com.evil.invalid/Ranbaixin', 'http://github.com/Ranbaixin', 'https://github.com/Ranbaixin?private=yes']) {
+    const data = valid(); data.profile.githubUrl = githubUrl;
+    assert.match(validateContent(data).join(';'), /githubUrl/);
+  }
 });
 
 test('duplicate project routes, incomplete project text, and local source paths cannot publish', () => {

@@ -1,6 +1,6 @@
 # Ranxin / 然鑫个人网站
 
-Astro 静态个人作品集。英文昵称 Ranxin 与中文昵称然鑫分别维护；真实姓名在个人资料面板和简历中展示。服务器与 GitHub Pages 共用公开资料与交互。
+Astro 静态个人作品集。英文昵称 Ranxin 与中文昵称然鑫分别维护；页面、公开源码及 PDF 均使用昵称，教育信息保留学校、学院和专业。服务器与 GitHub Pages 共用公开资料与交互。
 
 ## 本地构建与预览
 
@@ -18,7 +18,7 @@ npm run preview -- --port 4321
 
 ## 公开资料与简历
 
-统一编辑 `src/data/content.json`。`profile.nicknameEn` 是英文昵称，`profile.nicknameZh` 是中文昵称，`profile.name` 是真实姓名。项目中的个人职责、团队产出、验证阶段与实践收获分别维护。
+统一编辑 `src/data/content.json`。`profile.nicknameEn` 是英文昵称，`profile.nicknameZh` 是中文昵称，`profile.githubUrl` 是联系入口。真名、邮箱、入学和毕业年份不进入公开资料源；校验器拒绝添加这些资料字段。项目中的个人职责、团队产出、验证阶段与实践收获分别维护。
 
 网页与 PDF 使用同一份资料。安装 Python 的 reportlab 后运行：
 
@@ -28,6 +28,14 @@ npm run build
 ```
 
 生成器使用可嵌入中文字体；也可用 `PORTFOLIO_CJK_FONT` 指定字体文件。构建会核对 PDF 的资料摘要，资料变化而 PDF 未更新时阻止发布。公开附件随站部署，发布版本在 `dist/release.json`。
+
+## 分享与搜索
+
+共用布局提供 Open Graph 与 Twitter 大图卡片；分享图为 `public/social/ranxin-card.png`（1200×630），源图为同目录 SVG。`node scripts/generate-brand-assets.mjs` 使用已安装的 Playwright Chromium 重新生成 PNG 及 32×32 ICO；SVG favicon 继续保留。
+
+首页 Person 结构化数据仅使用昵称、学校关联和公开研究方向。构建生成 `sitemap-index.xml`、`sitemap-0.xml` 和兼容入口 `sitemap.xml`；`robots.txt` 指向本站 sitemap。404 页面不参与索引。`SITE_URL` 和 `SITE_BASE` 同时控制绝对地址及路径前缀；子目录部署的 robots 文件仍需由域名根路径提供给爬虫。
+
+分享卡片和搜索结果的最终展示由平台决定。旧版本和隐私清理记录仅存本地私有交付目录；回退须使用经过脱敏的构建，避免重新发布旧资料。
 
 ## 三个核心体验
 

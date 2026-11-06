@@ -7,8 +7,8 @@ test('nickname is the first impression and profile disclosure restores focus', a
   await expect(page.locator('h1')).toHaveText('Ranxin');
   await expect(page.locator('.nickname-zh')).toHaveText('然鑫');
   await expect(page.locator('meta[property="og:title"]')).toHaveAttribute('content', /Ranxin/);
-  await expect(page.locator('meta[name="description"]')).not.toHaveAttribute('content', /Ranxin/);
-  await expect(page.getByText('Ranxin', { exact: true })).not.toBeVisible();
+  await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', /Ranxin/);
+  await expect(page.locator('#profile-dialog')).not.toBeVisible();
   const opener = page.getByRole('button', { name: '个人资料', exact: true }).first();
   await opener.click();
   await expect(page.getByRole('dialog')).toBeVisible();
@@ -153,7 +153,7 @@ test('interactive routes work with all other origins blocked and reset on refres
 test('404 branding and project printing preserve identity and project boundaries', async ({ page }) => {
   await page.goto(url('404.html'));
   await expect(page).toHaveTitle(/Ranxin/);
-  await expect(page.locator('meta[property="og:title"]')).not.toHaveAttribute('content', /Ranxin/);
+  await expect(page.locator('meta[property="og:title"]')).toHaveAttribute('content', /Ranxin/);
   await page.goto(url('projects/renewable-forecasting/'));
   await page.emulateMedia({ media: 'print' });
   await expect(page.getByRole('heading', { name: '我负责的部分' })).toBeVisible();
